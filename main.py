@@ -83,7 +83,7 @@ async def fetch_pwwp_data(session: aiohttp.ClientSession, url: str, headers: Dic
         try:
             async with session.request(method, url, headers=headers, params=params, json=data) as response:
                 if response.status == 429:
-                    wait_time = 5 * (attempt + 1)
+                    wait_time = 15 * (attempt + 1)
                     logging.warning(f"Rate limited (429) on {url}, waiting {wait_time}s (attempt {attempt+1})")
                     if attempt < max_retries - 1:
                         await asyncio.sleep(wait_time)
@@ -398,47 +398,55 @@ async def process_pwwp(bot: Client, m: Message, user_id: int):
                     'Integration-With': 'Origin',
                 }
                 otp_sent = False
-                for otp_attempt in range(3):
+                otp_maybe_sent = False
+                for otp_attempt in range(2):
                     try:
                         async with session.post("https://api.penpencil.co/v1/users/get-otp?smsType=0", json=data, headers=otp_headers) as response:
                             otp_resp = await response.json()
-                            logging.info(f"OTP Response (attempt {otp_attempt+1}): {otp_resp}")
+                            logging.info(f"OTP Response (attempt {otp_attempt+1}): status={response.status} body={otp_resp}")
                             if response.status == 429:
-                                if otp_attempt < 2:
-                                    await editable.edit(f"**⏳ Rate limited, retrying in {5*(otp_attempt+1)}s...**")
-                                    await asyncio.sleep(5 * (otp_attempt + 1))
+                                otp_maybe_sent = True
+                                if otp_attempt < 1:
+                                    await editable.edit("**⏳ Server busy, retrying in 60s...**")
+                                    await asyncio.sleep(60)
                                     continue
                                 else:
-                                    await editable.edit("**❌ Too Many Requests. Please wait 2-3 minutes and try again.**")
-                                    return
+                                    break
                             if otp_resp.get("success"):
                                 otp_sent = True
                                 break
                             else:
                                 msg = otp_resp.get("message", "OTP send failed")
-                                if otp_attempt < 2:
-                                    await asyncio.sleep(3)
+                                otp_maybe_sent = True
+                                if otp_attempt < 1:
+                                    await asyncio.sleep(30)
                                     continue
-                                await editable.edit(f"**❌ OTP Error: {msg}**")
-                                return
+                                break
                     except Exception as e:
                         logging.exception(f"Error sending OTP (attempt {otp_attempt+1}): {e}")
-                        if otp_attempt < 2:
-                            await asyncio.sleep(3)
+                        otp_maybe_sent = True
+                        if otp_attempt < 1:
+                            await asyncio.sleep(10)
                             continue
-                        await editable.edit(f"**Error sending OTP: {e}**")
-                        return
-                if not otp_sent:
-                    await editable.edit("**❌ OTP send failed after retries. Try again later.**")
-                    return
+                        break
 
-                editable = await editable.edit("**ENTER OTP YOU RECEIVED**")
+                if otp_sent:
+                    editable = await editable.edit("**✅ OTP Sent! ENTER OTP YOU RECEIVED**")
+                elif otp_maybe_sent:
+                    editable = await editable.edit("**⚠️ Server returned error but OTP may still arrive on your phone.\nENTER OTP if received, or send 'cancel' to abort.**")
+                else:
+                    await editable.edit("**❌ OTP send failed. Try again later.**")
+                    return
                 try:
-                    input2 = await bot.listen(chat_id=m.chat.id, filters=filters.user(user_id), timeout=50)
-                    otp = input2.text
+                    input2 = await bot.listen(chat_id=m.chat.id, filters=filters.user(user_id), timeout=120)
+                    otp = input2.text.strip()
                     await input2.delete(True)
                 except:
                     await editable.edit("**Timeout! You took too long to respond**")
+                    return
+
+                if otp.lower() == 'cancel':
+                    await editable.edit("**Cancelled. Try again later.**")
                     return
 
                 payload = {
@@ -501,12 +509,12 @@ async def process_pwwp(bot: Client, m: Message, user_id: int):
                         logging.info(f"Purchased batches response status: {response.status} (attempt {batch_attempt+1})")
                         if response.status == 429:
                             if batch_attempt < 2:
-                                wait_time = 5 * (batch_attempt + 1)
-                                await editable.edit(f"**⏳ Rate limited, retrying in {wait_time}s...**")
+                                wait_time = 30 * (batch_attempt + 1)
+                                await editable.edit(f"**⏳ Server busy, retrying in {wait_time}s...**")
                                 await asyncio.sleep(wait_time)
                                 continue
                             else:
-                                await editable.edit("**❌ Too Many Requests. Please wait 2-3 minutes and try again.**")
+                                await editable.edit("**❌ Too Many Requests. Please wait 5 minutes and try again.**")
                                 return
                         if response.status == 401:
                             await editable.edit("**```\nLogin Failed❗Token is expired or invalid```\nPlease Enter Working Token\n                       OR\nLogin With Phone Number**")
