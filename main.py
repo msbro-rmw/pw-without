@@ -59,7 +59,7 @@ async def start(bot, message):
 
   keyboard = [
     [
-      InlineKeyboardButton("🚀 Physicccs Wallah without Purchase 🚀", callback_data="pwwp")
+      InlineKeyboardButton("🚀 Physicss Wallah without Purchase 🚀", callback_data="pwwp")
     ],
     [
       InlineKeyboardButton("📘 Classplus without Purchase 📘", callback_data="cpwp")
@@ -359,18 +359,18 @@ async def process_pwwp(bot: Client, m: Message, user_id: int):
         return
 
     headers = {
-        'Host': 'api.penpencil.co',
-        'Client-Id': '5eb393ee95fab7468a79d189',
-        'Client-Version': '1910',
-        'User-Agent': 'Mozilla/5.0 (Linux; Android 12; M2101K6P) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/107.0.0.0 Mobile Safari/537.36',
-        'RandomId': str(uuid.uuid4()),
-        'Client-Type': 'WEB',
-        'Content-Type': 'application/json; charset=utf-8',
+        'client-id': '5eb393ee95fab7468a79d189',
+        'client-version': '12400',
+        'user-agent': 'Mozilla/5.0 (Linux; Android 14; Pixel 8) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Mobile Safari/537.36',
+        'randomid': str(uuid.uuid4()),
+        'client-type': 'WEB',
+        'content-type': 'application/json; charset=utf-8',
     }
 
     CONNECTOR = aiohttp.TCPConnector(limit=1000)
     async with aiohttp.ClientSession(connector=CONNECTOR) as session:
         try:
+            raw_text1 = raw_text1.strip()
             if raw_text1.isdigit() and len(raw_text1) == 10:
                 phone = raw_text1
                 data = {
@@ -378,14 +378,24 @@ async def process_pwwp(bot: Client, m: Message, user_id: int):
                     "countryCode": "+91",
                     "organizationId": "5eb393ee95fab7468a79d189"
                 }
+                otp_headers = {
+                    'client-id': '5eb393ee95fab7468a79d189',
+                    'client-version': '12400',
+                    'user-agent': headers['user-agent'],
+                    'randomid': headers['randomid'],
+                    'client-type': 'WEB',
+                    'content-type': 'application/json; charset=utf-8',
+                }
                 try:
-                    async with session.post("https://api.penpencil.co/v1/users/get-otp?smsType=0", json=data, headers=headers) as response:
+                    async with session.post("https://api.penpencil.co/v3/users/get-otp?smsType=2", json=data, headers=otp_headers) as response:
                         otp_resp = await response.json()
+                        logging.info(f"OTP Response: {otp_resp}")
                         if not otp_resp.get("success"):
                             msg = otp_resp.get("message", "OTP send failed")
                             await editable.edit(f"**❌ OTP Error: {msg}**")
                             return
                 except Exception as e:
+                    logging.exception(f"Error sending OTP: {e}")
                     await editable.edit(f"**Error sending OTP: {e}**")
                     return
 
@@ -410,21 +420,23 @@ async def process_pwwp(bot: Client, m: Message, user_id: int):
                 }
 
                 try:
-                    async with session.post("https://api.penpencil.co/v3/oauth/token", json=payload, headers=headers) as response:
+                    async with session.post(f"https://api.penpencil.co/v3/oauth/token", json=payload, headers=otp_headers) as response:
                         token_resp = await response.json()
+                        logging.info(f"Token Response status: {response.status}")
                         if not token_resp.get("success") or not token_resp.get("data"):
-                            err = token_resp.get("message", "OTP verification failed")
-                            await editable.edit(f"**❌ Login Failed:** `{err}`")
+                            msg = token_resp.get("message", "Login failed")
+                            await editable.edit(f"**❌ Login Error: {msg}**")
                             return
                         access_token = token_resp["data"]["access_token"]
-                        await editable.edit(f"<b>✅ Physics Wallah Login Successful!</b>\n\n<pre language='Token'>{access_token}</pre>")
-                        editable = await m.reply_text("**Getting Batches In Your Id...**")
+                        monster = await editable.edit(f"<b>Physics Wallah Login Successful ✅</b>\n\n<pre language='Save this Login Token for future usage'>{access_token}</pre>\n\n")
+                        editable = await m.reply_text("**Getting Batches In Your I'd**")
+                    
                 except Exception as e:
-                    await editable.edit(f"**❌ Token Error:** `{e}`")
+                    await editable.edit(f"**Error : {e}**")
                     return
 
             else:
-                access_token = raw_text1
+                access_token = raw_text1.strip()
             
             headers['Authorization'] = f"Bearer {access_token}"
         
@@ -433,15 +445,17 @@ async def process_pwwp(bot: Client, m: Message, user_id: int):
                 'page': '1',
             }
             try:
-                async with session.get("https://api.penpencil.co/v3/batches/all-purchased-batches", headers=headers, params=params) as response:
+                async with session.get(f"https://api.penpencil.co/v3/batches/all-purchased-batches", headers=headers, params=params) as response:
                     resp_json = await response.json()
-                    if not resp_json.get("success"):
-                        err_msg = resp_json.get("message", f"HTTP {response.status}")
-                        await editable.edit(f"**❌ Login Failed!**\n`{err_msg}`\n\nPlease Enter Valid Token OR Login With Phone Number")
+                    logging.info(f"Purchased batches response status: {response.status}")
+                    if response.status == 401 or not resp_json.get("success"):
+                        msg = resp_json.get("message", "Token is expired or invalid")
+                        await editable.edit(f"**```\nLogin Failed❗{msg}```\nPlease Enter Working Token\n                       OR\nLogin With Phone Number**")
                         return
                     batches = resp_json.get("data", [])
             except Exception as e:
-                await editable.edit(f"**❌ Login Error:** `{e}`\n\nPlease Enter Valid Token OR Login With Phone Number")
+                logging.exception(f"Error fetching purchased batches: {e}")
+                await editable.edit(f"**```\nLogin Failed❗Error: {e}```\nPlease Enter Working Token\n                       OR\nLogin With Phone Number**")
                 return
         
             await editable.edit("**Enter Your Batch Name**")
@@ -808,9 +822,8 @@ async def process_cpwp(bot: Client, m: Message, user_id: int):
         'webengage-luid' : '00000187-6fe4-5d41-a530-26186858be4c'
     }
 
-    loop = asyncio.get_event_loop()
-    CONNECTOR = aiohttp.TCPConnector(limit=1000, loop=loop)
-    async with aiohttp.ClientSession(connector=CONNECTOR, loop=loop) as session:
+    CONNECTOR = aiohttp.TCPConnector(limit=1000)
+    async with aiohttp.ClientSession(connector=CONNECTOR) as session:
         try:
             editable = await m.reply_text("**Enter ORG Code Of Your Classplus App**")
             
@@ -1419,10 +1432,9 @@ async def appxwp_callback(bot, callback_query):
 
 async def process_appxwp(bot: Client, m: Message, user_id: int):
 
-    loop = asyncio.get_event_loop()
-    CONNECTOR = aiohttp.TCPConnector(limit=100, loop=loop)
+    CONNECTOR = aiohttp.TCPConnector(limit=100)
 
-    async with aiohttp.ClientSession(connector=CONNECTOR, loop=loop) as session:
+    async with aiohttp.ClientSession(connector=CONNECTOR) as session:
         try:
             editable = await m.reply_text("**Enter App Name Or Api**")
 
