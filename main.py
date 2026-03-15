@@ -32,6 +32,19 @@ from pyrogram.raw.functions.channels import GetParticipants
 from config import api_id, api_hash, bot_token, auth_users
 from datetime import datetime
 import time
+import os
+from flask import Flask
+
+app = Flask(__name__)
+
+@app.route('/')
+def hello_world():
+    return 'Hello from Tech VJ'
+
+if __name__ == "__main__":
+    port = int(os.environ.get("PORT", 8000))
+    app.run(host="0.0.0.0", port=port)
+    
 from concurrent.futures import ThreadPoolExecutor
 THREADPOOL = ThreadPoolExecutor(max_workers=1000)
 import logging
