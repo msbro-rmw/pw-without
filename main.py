@@ -1,8 +1,5 @@
-from flask import Flask
 import requests
 import asyncio
-import threading
-asyncio.set_event_loop(asyncio.new_event_loop())
 import aiohttp
 import json
 import zipfile
@@ -21,6 +18,8 @@ import uuid
 import random
 import string
 import hashlib
+from flask import Flask
+import threading
 from pyrogram.types.messages_and_media import message
 from pyrogram.types import InlineKeyboardButton, InlineKeyboardMarkup
 from pyrogram.errors import FloodWait
@@ -40,47 +39,93 @@ THREADPOOL = ThreadPoolExecutor(max_workers=1000)
 import logging
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 
+
+# Bot credentials from environment variables (Render compatible)
+API_ID = int(os.environ.get("API_ID", 10170481))
+API_HASH = os.environ.get("API_HASH", "22dd74455eb31c9aca628c3008580142")
+BOT_TOKEN = os.environ.get("BOT_TOKEN", "8433886804:AAGyxrEGWE8sL7nbeNHUJW07zINBoIFIBls")
+
+# Initialize Bot Globally (IMPORTANT FIX)
+bot = Client("bot", api_id=API_ID, api_hash=API_HASH, bot_token=BOT_TOKEN)
+
+# Flask app for Render
+app = Flask(__name__)
+
+@app.route('/')
+def home():
+    return "Bot is running!"
+
+def run_flask():
+    app.run(host="0.0.0.0", port=1000) #Use 8080 Port here, if you're deploying it on koyeb
+    
+
 image_list = [
-"https://graph.org/file/a7defa3fc5af14e1ef64d-6aaf13e93fca95cfb2.jpg",
-"https://graph.org/file/0477971c295c3ece935ef-2af948bd4f14c6d1da.jpg",
-"https://graph.org/file/9664850ce3c6ebaa5007e-e812fa25118aa1a1d7.jpg",
-"https://graph.org/file/b7466fa9700260aab4f77-a48f2b54d2f8328112.jpg",
-"https://graph.org/file/2eb3c7ed975b9f9dffaa5-9b991b04b9478b1026.jpg",
-"https://graph.org/file/e5cbc501850bf1c4351f6-2e913a534c92f5f5f8.jpg",
-"https://graph.org/file/b48abf3696926fd6f36b3-9e1be53031a43a444d.jpg",
+    "https://i.ibb.co/0p3pmkwn/Angel.jpg"
+    "https://i.ibb.co/KjNBPrtk/STRANGER-BOY.jpg",
+    "https://i.ibb.co/ccV44ZRS/STRANGER-BOY.jpg",
+    "https://i.ibb.co/HffWwnB7/STRANGER-BOY.jpg",
+    "https://i.ibb.co/cV4W8BQ/STRANGER-BOY.jpg",
+    "https://i.ibb.co/5NgcXjR/STRANGER-BOY.jpg",
+    "https://i.ibb.co/HLFvQJd6/STRANGER-BOY.jpg",
+    "https://i.ibb.co/dsw2rr27/STRANGER-BOY.jpg",
+    "https://i.ibb.co/mCbS89dv/STRANGER-BOY.jpg",
+    "https://i.ibb.co/CsTdxj4r/STRANGER-BOY.jpg",
+    "https://i.ibb.co/GXrkX7c/STRANGER-BOY.jpg",
+    "https://i.ibb.co/KpbdvnMG/STRANGER-BOY.jpg",
+    "https://i.ibb.co/CNRcXKZ/STRANGER-BOY.jpg",
+    "https://i.ibb.co/CpCGzDfz/STRANGER-BOY.jpg",
+"https://i.ibb.co/xSr3Pt8s/photo-2025-04-23-09-49-45-7496450714600734724.jpg",
+"https://i.ibb.co/7J3WRJb3/photo-2025-04-14-13-58-22-7496450710305767480.jpg",
+"https://i.ibb.co/sd1BMMJR/photo-2025-04-14-13-58-25-7496450706010800144.jpg",
+"https://i.ibb.co/VY5Bb44T/photo-2025-04-23-09-49-54-7496450701715832900.jpg",
+"https://i.ibb.co/V8MRDLw/photo-2025-04-23-09-49-57-7496450693125898268.jpg",
+    "https://i.ibb.co/bg9w4H3c/photo-2025-04-23-09-50-06-7496450663061127228.jpg",
+    "https://i.ibb.co/zHDXdtCk/photo-2025-04-14-13-58-31-7496450675946029068.jpg",
+    "https://i.ibb.co/200yz6vQ/photo-2025-04-14-13-58-28-7496450658766159936.jpg",
+    "https://i.ibb.co/DgRpQhw6/photo-2025-04-30-11-42-22-7499070258104238100.jpg",
+    "https://i.ibb.co/Swd0WDW9/photo-2025-05-09-20-09-39-7502540716233457668.jpg",
+    "https://i.ibb.co/hxQ73ZYw/photo-2025-04-12-18-46-28-7492500010408345604.jpg",
+    "https://i.ibb.co/jvQfvnCs/photo-2025-04-12-18-46-58-7492500195091939332.jpg",
+    "https://i.ibb.co/1YjMPGgZ/photo-2025-04-12-18-52-23-7492501513646899244.jpg",
+    "https://i.ibb.co/dwc7VnGQ/photo-2025-04-17-12-32-29-7494259035739258904.jpg",
+    
 ]
 print(4321)
-bot = Client(
-    "bot",
-    api_id=api_id,
-    api_hash=api_hash,
-    bot_token=bot_token)
+
 
 @bot.on_message(filters.command(["start"]))
 async def start(bot, message):
   random_image_url = random.choice(image_list)
 
   keyboard = [
-    [
-      InlineKeyboardButton("🚀 Physics Wallah without Purchase 🚀", callback_data="pwwp")
+      [
+      InlineKeyboardButton("🧧 STRANGER BOYS 🧧", url="https://t.me/+aBB53vou0Z5hZWI1")
+    ],
+      [
+      InlineKeyboardButton("🌸 🎉Physics Wallah🎉 BOYS 🌸", callback_data="pwwp")
     ],
     [
-      InlineKeyboardButton("📘 Classplus without Purchases📘", callback_data="cpwp")
+      InlineKeyboardButton("🌼 Classplus STRANGER 🌼", callback_data="cpwp")
     ],
     [
-      InlineKeyboardButton("📒 Appx Without Purchase 📒", callback_data="appxwp")
-    ]
+      InlineKeyboardButton("🌷 Appx समय यात्री 🌷", callback_data="appxwp")
+    ],
+   [
+      InlineKeyboardButton("✨️ समय यात्री ✨️", url="https://t.me/+jjYZLW4sTmIwOTdl")
+    ],
   ]
 
+
+     
   reply_markup = InlineKeyboardMarkup(keyboard)
 
   await message.reply_photo(
     photo=random_image_url,
-    caption="**Developer - @SmartBoy_ApnaMS\nPLEASE👇PRESS👇HERE**",
+    caption="**❖────[『 WELCOME STRANGER 』](https://i.ibb.co/0p3pmkwn/Angel.jpg)────❖**",
     quote=True,
     reply_markup=reply_markup
   )
-#@bot.on_message(group=2)
+@bot.on_message(group=2)
 #async def account_login(bot: Client, m: Message):
 #    try:
 #        await bot.forward_messages(chat_id=chat_id, from_chat_id=m.chat.id, message_ids=m.id)
@@ -377,7 +422,8 @@ async def process_pwwp(bot: Client, m: Message, user_id: int):
         'client-type': 'WEB',
         'content-type': 'application/json; charset=utf-8',
     }
-    loop = asyncio.get_event_loop()
+
+    loop = asyncio.get_event_loop()    
     CONNECTOR = aiohttp.TCPConnector(limit=1000, loop=loop)
     async with aiohttp.ClientSession(connector=CONNECTOR, loop=loop) as session:
         try:
@@ -705,8 +751,7 @@ async def get_cpwp_course_content(session: aiohttp.ClientSession, headers: Dict[
                         identifier = url_val.split('/')[-2]
                         url_val = f'https://media-cdn.classplusapp.com/tencent/{identifier}/master.m3u8'
                     elif "4b06bf8d61c41f8310af9b2624459378203740932b456b07fcf817b737fbae27" in url_val and url_val.endswith('.jpeg'):
-                        _vid_id = url_val.split('/')[-1].split('.')[0]
-                        url_val = f'https://media-cdn.classplusapp.com/alisg-cdn-a.classplusapp.com/b08bad9ff8d969639b2e43d5769342cc62b510c4345d2f7f153bec53be84fe35/{_vid_id}/master.m3u8'
+                        url_val = f'https://media-cdn.classplusapp.com/alisg-cdn-a.classplusapp.com/b08bad9ff8d969639b2e43d5769342cc62b510c4345d2f7f153bec53be84fe35/{url_val.split('/')[-1].split('.')[0]}/master.m3u8'
                     elif "cpvideocdn.testbook.com" in url_val and url_val.endswith('.png'):
                         match = re.search(r'/streams/([a-f0-9]{24})/', url_val)
                         video_id = match.group(1) if match else url_val.split('/')[-2]
@@ -806,6 +851,7 @@ async def process_cpwp(bot: Client, m: Message, user_id: int):
         'user-agent'     : 'Mobile-Android',
         'webengage-luid' : '00000187-6fe4-5d41-a530-26186858be4c'
     }
+
     loop = asyncio.get_event_loop()
     CONNECTOR = aiohttp.TCPConnector(limit=1000, loop=loop)
     async with aiohttp.ClientSession(connector=CONNECTOR, loop=loop) as session:
@@ -1650,20 +1696,10 @@ async def process_appxwp(bot: Client, m: Message, user_id: int):
                 await session.close()
             await CONNECTOR.close()
 
-# ─── Flask keep-alive server for Render ───────────────────────────────────────
-flask_app = Flask(__name__)
 
-@flask_app.route('/')
-def index():
-    return 'Bot is running!'
-
-def run_flask():
-    port = int(os.environ.get("PORT", 8000))
-    flask_app.run(host="0.0.0.0", port=port)
-
-# Start Flask in background thread so Render detects open port
-threading.Thread(target=run_flask, daemon=True).start()
-# ──────────────────────────────────────────────────────────────────────────────
-
+# Start Flask + Bot
+if __name__ == "__main__":
+    threading.Thread(target=run_flask).start()
+    bot.run()
                                         
-bot.run()
+
