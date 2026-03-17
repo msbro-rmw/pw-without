@@ -87,7 +87,7 @@ BOT_TOKEN = os.environ.get("BOT_TOKEN", "8433886804:AAGyxrEGWE8sL7nbeNHUJW07zINB
 bot = Client("bot", api_id=API_ID, api_hash=API_HASH, bot_token=BOT_TOKEN)
 
 image_list = [
-    "https://i.ibb.co/0p3pmkwn/Angel.jpg"
+    "https://i.ibb.co/0p3pmkwn/Angel.jpg",
     "https://i.ibb.co/KjNBPrtk/STRANGER-BOY.jpg",
     "https://i.ibb.co/ccV44ZRS/STRANGER-BOY.jpg",
     "https://i.ibb.co/HffWwnB7/STRANGER-BOY.jpg",
@@ -126,7 +126,7 @@ async def start(bot, message):
 
   keyboard = [
       [
-      InlineKeyboardButton("🧧 STRANGER BOYS 🧧", url="https://t.me/+aBB53vou0Z5hZWI1")
+      InlineKeyboardButton("🧧 STRANGER BOYS ", url="https://t.me/+aBB53vou0Z5hZWI1")
     ],
       [
       InlineKeyboardButton("🌸 🎉Physics Wallah🎉 BOYS 🌸", callback_data="pwwp")
