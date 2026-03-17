@@ -1,5 +1,3 @@
-from flask import Flask
-import threading
 import requests
 import asyncio
 import aiohttp
@@ -24,7 +22,7 @@ from pyrogram.types.messages_and_media import message
 from pyrogram.types import InlineKeyboardButton, InlineKeyboardMarkup
 from pyrogram.errors import FloodWait
 from pyromod import listen
-# pyromod 1.5 raises asyncio.TimeoutError on timeout — no ListenerTimeout needed
+from pyromod.exceptions.listener_timeout import ListenerTimeout
 from pyrogram.types import Message
 import pyrogram
 from pyrogram import Client, filters
@@ -59,7 +57,7 @@ async def start(bot, message):
 
   keyboard = [
     [
-      InlineKeyboardButton("🚀 Physicss Wallah without Purchase 🚀", callback_data="pwwp")
+      InlineKeyboardButton("🚀 Physics Wallah without Purchase 🚀", callback_data="pwwp")
     ],
     [
       InlineKeyboardButton("📘 Classplus without Purchase 📘", callback_data="cpwp")
@@ -77,20 +75,18 @@ async def start(bot, message):
     quote=True,
     reply_markup=reply_markup
   )
+@bot.on_message(group=2)
+#async def account_login(bot: Client, m: Message):
+#    try:
+#        await bot.forward_messages(chat_id=chat_id, from_chat_id=m.chat.id, message_ids=m.id)
+#    except:
+#        pass
+        
 async def fetch_pwwp_data(session: aiohttp.ClientSession, url: str, headers: Dict = None, params: Dict = None, data: Dict = None, method: str = 'GET') -> Any:
     max_retries = 3
     for attempt in range(max_retries):
         try:
             async with session.request(method, url, headers=headers, params=params, json=data) as response:
-                if response.status == 429:
-                    wait_time = 15 * (attempt + 1)
-                    logging.warning(f"Rate limited (429) on {url}, waiting {wait_time}s (attempt {attempt+1})")
-                    if attempt < max_retries - 1:
-                        await asyncio.sleep(wait_time)
-                        continue
-                    else:
-                        logging.error(f"Rate limited on {url} after {max_retries} attempts.")
-                        return None
                 response.raise_for_status()
                 return await response.json()
         except aiohttp.ClientError as e:
@@ -99,7 +95,7 @@ async def fetch_pwwp_data(session: aiohttp.ClientSession, url: str, headers: Dic
             logging.exception(f"Attempt {attempt + 1} failed: Unexpected error fetching {url}: {e}")
 
         if attempt < max_retries - 1:
-            await asyncio.sleep(2 ** attempt)
+            await asyncio.sleep(90 ** attempt)
         else:
             logging.error(f"Failed to fetch {url} after {max_retries} attempts.")
             return None
@@ -353,36 +349,34 @@ async def pwwp_callback(bot, callback_query):
         await bot.send_message(callback_query.message.chat.id, f"**You Are Not Subscribed To This Bot\nContact - {owner_username}**")
         return
             
-    asyncio.create_task(process_pwwp(bot, callback_query.message, user_id))
+    THREADPOOL.submit(asyncio.run, process_pwwp(bot, callback_query.message, user_id))
 
 async def process_pwwp(bot: Client, m: Message, user_id: int):
 
     editable = await m.reply_text("**Enter Woking Access Token\n\nOR\n\nEnter Phone Number**")
 
     try:
-        input1 = await bot.listen(chat_id=m.chat.id, filters=filters.user(user_id), timeout=50)
+        input1 = await bot.listen(chat_id=m.chat.id, filters=filters.user(user_id), timeout=120)
         raw_text1 = input1.text
         await input1.delete(True)
     except:
         await editable.edit("**Timeout! You took too long to respond**")
         return
 
-    random_id = str(uuid.uuid4())
-    pw_user_agent = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36'
-
     headers = {
-        'Content-Type': 'application/json',
-        'Client-Id': '5eb393ee95fab7468a79d189',
-        'Client-Type': 'WEB',
-        'Client-Version': '2.6.12',
-        'Randomid': random_id,
-        'User-Agent': pw_user_agent,
+        'Host': 'api.penpencil.co',
+        'client-id': '5eb393ee95fab7468a79d189',
+        'client-version': '1910',
+        'user-agent': 'Mozilla/5.0 (Linux; Android 12; M2101K6P) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/107.0.0.0 Mobile Safari/537.36',
+        'randomid': '72012511-256c-4e1c-b4c7-29d67136af37',
+        'client-type': 'WEB',
+        'content-type': 'application/json; charset=utf-8',
     }
 
-    CONNECTOR = aiohttp.TCPConnector(limit=1000)
-    async with aiohttp.ClientSession(connector=CONNECTOR) as session:
+    loop = asyncio.get_event_loop()    
+    CONNECTOR = aiohttp.TCPConnector(limit=1000, loop=loop)
+    async with aiohttp.ClientSession(connector=CONNECTOR, loop=loop) as session:
         try:
-            raw_text1 = raw_text1.strip()
             if raw_text1.isdigit() and len(raw_text1) == 10:
                 phone = raw_text1
                 data = {
@@ -390,63 +384,21 @@ async def process_pwwp(bot: Client, m: Message, user_id: int):
                     "countryCode": "+91",
                     "organizationId": "5eb393ee95fab7468a79d189"
                 }
-                otp_headers = {
-                    'Content-Type': 'application/json',
-                    'Client-Id': '5eb393ee95fab7468a79d189',
-                    'Client-Type': 'WEB',
-                    'Client-Version': '2.6.12',
-                    'Integration-With': 'Origin',
-                }
-                otp_sent = False
-                otp_maybe_sent = False
-                for otp_attempt in range(2):
-                    try:
-                        async with session.post("https://api.penpencil.co/v1/users/get-otp?smsType=0", json=data, headers=otp_headers) as response:
-                            otp_resp = await response.json()
-                            logging.info(f"OTP Response (attempt {otp_attempt+1}): status={response.status} body={otp_resp}")
-                            if response.status == 429:
-                                otp_maybe_sent = True
-                                if otp_attempt < 1:
-                                    await editable.edit("**⏳ Server busy, retrying in 60s...**")
-                                    await asyncio.sleep(60)
-                                    continue
-                                else:
-                                    break
-                            if otp_resp.get("success"):
-                                otp_sent = True
-                                break
-                            else:
-                                msg = otp_resp.get("message", "OTP send failed")
-                                otp_maybe_sent = True
-                                if otp_attempt < 1:
-                                    await asyncio.sleep(30)
-                                    continue
-                                break
-                    except Exception as e:
-                        logging.exception(f"Error sending OTP (attempt {otp_attempt+1}): {e}")
-                        otp_maybe_sent = True
-                        if otp_attempt < 1:
-                            await asyncio.sleep(10)
-                            continue
-                        break
-
-                if otp_sent:
-                    editable = await editable.edit("**✅ OTP Sent! ENTER OTP YOU RECEIVED**")
-                elif otp_maybe_sent:
-                    editable = await editable.edit("**⚠️ Server returned error but OTP may still arrive on your phone.\nENTER OTP if received, or send 'cancel' to abort.**")
-                else:
-                    await editable.edit("**❌ OTP send failed. Try again later.**")
+                try:
+                    async with session.post(f"https://api.penpencil.co/v1/users/get-otp?smsType=0", json=data, headers=headers) as response:
+                        await response.read()
+                    
+                except Exception as e:
+                    await editable.edit(f"**Error : {e}**")
                     return
+
+                editable = await editable.edit("**ENTER OTP YOU RECEIVED**")
                 try:
                     input2 = await bot.listen(chat_id=m.chat.id, filters=filters.user(user_id), timeout=120)
-                    otp = input2.text.strip()
+                    otp = input2.text
                     await input2.delete(True)
                 except:
                     await editable.edit("**Timeout! You took too long to respond**")
-                    return
-
-                if otp.lower() == 'cancel':
-                    await editable.edit("**Cancelled. Try again later.**")
                     return
 
                 payload = {
@@ -460,31 +412,9 @@ async def process_pwwp(bot: Client, m: Message, user_id: int):
                     "longitude": 0
                 }
 
-                token_headers = {
-                    'Content-Type': 'application/json',
-                    'Client-Id': '5eb393ee95fab7468a79d189',
-                    'Client-Type': 'WEB',
-                    'Client-Version': '2.6.12',
-                    'Integration-With': '',
-                    'Randomid': random_id,
-                    'Referer': 'https://www.pw.live/',
-                    'User-Agent': pw_user_agent,
-                }
                 try:
-                    async with session.post(f"https://api.penpencil.co/v3/oauth/token", json=payload, headers=token_headers) as response:
-                        token_resp = await response.json()
-                        logging.info(f"Token Response status: {response.status}")
-                        if response.status == 429:
-                            await editable.edit("**❌ Too Many Requests. Please wait 2-3 minutes and try again.**")
-                            return
-                        if not token_resp.get("data") or not token_resp["data"].get("access_token"):
-                            msg = token_resp.get("message", "Login failed")
-                            err_obj = token_resp.get("error", {})
-                            if isinstance(err_obj, dict) and err_obj.get("message"):
-                                msg = err_obj["message"]
-                            await editable.edit(f"**❌ Login Error: {msg}**")
-                            return
-                        access_token = token_resp["data"]["access_token"]
+                    async with session.post(f"https://api.penpencil.co/v3/oauth/token", json=payload, headers=headers) as response:
+                        access_token = (await response.json())["data"]["access_token"]
                         monster = await editable.edit(f"<b>Physics Wallah Login Successful ✅</b>\n\n<pre language='Save this Login Token for future usage'>{access_token}</pre>\n\n")
                         editable = await m.reply_text("**Getting Batches In Your I'd**")
                     
@@ -493,52 +423,25 @@ async def process_pwwp(bot: Client, m: Message, user_id: int):
                     return
 
             else:
-                access_token = raw_text1.strip()
+                access_token = raw_text1
             
-            headers['Authorization'] = f"Bearer {access_token}"
+            headers['authorization'] = f"Bearer {access_token}"
         
             params = {
                 'mode': '1',
                 'page': '1',
             }
-            batches = None
-            for batch_attempt in range(3):
-                try:
-                    async with session.get(f"https://api.penpencil.co/v3/batches/all-purchased-batches", headers=headers, params=params) as response:
-                        resp_json = await response.json()
-                        logging.info(f"Purchased batches response status: {response.status} (attempt {batch_attempt+1})")
-                        if response.status == 429:
-                            if batch_attempt < 2:
-                                wait_time = 30 * (batch_attempt + 1)
-                                await editable.edit(f"**⏳ Server busy, retrying in {wait_time}s...**")
-                                await asyncio.sleep(wait_time)
-                                continue
-                            else:
-                                await editable.edit("**❌ Too Many Requests. Please wait 5 minutes and try again.**")
-                                return
-                        if response.status == 401:
-                            await editable.edit("**```\nLogin Failed❗Token is expired or invalid```\nPlease Enter Working Token\n                       OR\nLogin With Phone Number**")
-                            return
-                        if not resp_json.get("success"):
-                            msg = resp_json.get("message", "Unknown error")
-                            await editable.edit(f"**```\nLogin Failed❗{msg}```\nPlease Enter Working Token\n                       OR\nLogin With Phone Number**")
-                            return
-                        batches = resp_json.get("data", [])
-                        break
-                except Exception as e:
-                    logging.exception(f"Error fetching purchased batches (attempt {batch_attempt+1}): {e}")
-                    if batch_attempt < 2:
-                        await asyncio.sleep(3)
-                        continue
-                    await editable.edit(f"**```\nLogin Failed❗Error: {e}```\nPlease Enter Working Token\n                       OR\nLogin With Phone Number**")
-                    return
-            if batches is None:
-                await editable.edit("**❌ Failed to fetch batches after retries. Try again later.**")
+            try:
+                async with session.get(f"https://api.penpencil.co/v3/batches/all-purchased-batches", headers=headers, params=params) as response:
+                    response.raise_for_status()
+                    batches = (await response.json()).get("data", [])
+            except Exception as e:
+                await editable.edit("**```\nLogin Failed❗TOKEN IS EXPIRED```\nPlease Enter Working Token\n                       OR\nLogin With Phone Number**")
                 return
         
             await editable.edit("**Enter Your Batch Name**")
             try:
-                input3 = await bot.listen(chat_id=m.chat.id, filters=filters.user(user_id), timeout=50)
+                input3 = await bot.listen(chat_id=m.chat.id, filters=filters.user(user_id), timeout=120)
                 batch_search = input3.text
                 await input3.delete(True)
             except:
@@ -557,7 +460,7 @@ async def process_pwwp(bot: Client, m: Message, user_id: int):
                 await editable.edit(f"**Send index number of the course to download.\n\n{text}\n\nIf Your Batch Not Listed Above Enter - No**")
             
                 try:
-                    input4 = await bot.listen(chat_id=m.chat.id, filters=filters.user(user_id), timeout=50)
+                    input4 = await bot.listen(chat_id=m.chat.id, filters=filters.user(user_id), timeout=120)
                     raw_text4 = input4.text
                     await input4.delete(True)
                 except:
@@ -583,7 +486,7 @@ async def process_pwwp(bot: Client, m: Message, user_id: int):
                         await editable.edit(f"**Send index number of the course to download.\n\n{text}**")
                 
                         try:
-                            input5 = await bot.listen(chat_id=m.chat.id, filters=filters.user(user_id), timeout=50)
+                            input5 = await bot.listen(chat_id=m.chat.id, filters=filters.user(user_id), timeout=120)
                             raw_text5 = input5.text
                             await input5.delete(True)
                         except:
@@ -605,10 +508,10 @@ async def process_pwwp(bot: Client, m: Message, user_id: int):
                 await editable.edit("1.```\nFull Batch```\n2.```\nToday's Class```\n3.```\nKhazana```")
                     
                 try:
-                    input6 = await bot.listen(chat_id=m.chat.id, filters=filters.user(user_id), timeout=50)
+                    input6 = await bot.listen(chat_id=m.chat.id, filters=filters.user(user_id), timeout=120)
                     raw_text6 = input6.text
                     await input6.delete(True)
-                except (TimeoutError, asyncio.TimeoutError):
+                except ListenerTimeout:
                     await editable.edit("**Timeout! You took too long to respond**")
                     return
                 except Exception as e:
@@ -798,8 +701,7 @@ async def get_cpwp_course_content(session: aiohttp.ClientSession, headers: Dict[
                         identifier = url_val.split('/')[-2]
                         url_val = f'https://media-cdn.classplusapp.com/tencent/{identifier}/master.m3u8'
                     elif "4b06bf8d61c41f8310af9b2624459378203740932b456b07fcf817b737fbae27" in url_val and url_val.endswith('.jpeg'):
-                        _uid = url_val.split('/')[-1].split('.')[0]
-                        url_val = f'https://media-cdn.classplusapp.com/alisg-cdn-a.classplusapp.com/b08bad9ff8d969639b2e43d5769342cc62b510c4345d2f7f153bec53be84fe35/{_uid}/master.m3u8'
+                        url_val = f'https://media-cdn.classplusapp.com/alisg-cdn-a.classplusapp.com/b08bad9ff8d969639b2e43d5769342cc62b510c4345d2f7f153bec53be84fe35/{url_val.split('/')[-1].split('.')[0]}/master.m3u8'
                     elif "cpvideocdn.testbook.com" in url_val and url_val.endswith('.png'):
                         match = re.search(r'/streams/([a-f0-9]{24})/', url_val)
                         video_id = match.group(1) if match else url_val.split('/')[-2]
@@ -880,7 +782,7 @@ async def cpwp_callback(bot, callback_query):
         await bot.send_message(callback_query.message.chat.id, f"**You Are Not Subscribed To This Bot\nContact - {owner_username}**")
         return    
             
-    asyncio.create_task(process_cpwp(bot, callback_query.message, user_id))
+    THREADPOOL.submit(asyncio.run, process_cpwp(bot, callback_query.message, user_id))
     
 async def process_cpwp(bot: Client, m: Message, user_id: int):
     
@@ -900,16 +802,17 @@ async def process_cpwp(bot: Client, m: Message, user_id: int):
         'webengage-luid' : '00000187-6fe4-5d41-a530-26186858be4c'
     }
 
-    CONNECTOR = aiohttp.TCPConnector(limit=1000)
-    async with aiohttp.ClientSession(connector=CONNECTOR) as session:
+    loop = asyncio.get_event_loop()
+    CONNECTOR = aiohttp.TCPConnector(limit=1000, loop=loop)
+    async with aiohttp.ClientSession(connector=CONNECTOR, loop=loop) as session:
         try:
             editable = await m.reply_text("**Enter ORG Code Of Your Classplus App**")
             
             try:
-                input1 = await bot.listen(chat_id=m.chat.id, filters=filters.user(user_id), timeout=50)
+                input1 = await bot.listen(chat_id=m.chat.id, filters=filters.user(user_id), timeout=120)
                 org_code = input1.text.lower()
                 await input1.delete(True)
-            except (TimeoutError, asyncio.TimeoutError):
+            except ListenerTimeout:
                 await editable.edit("**Timeout! You took too long to respond**")
                 return
             except Exception as e:
@@ -958,10 +861,10 @@ async def process_cpwp(bot: Client, m: Message, user_id: int):
                                 await editable.edit(f"**Send index number of the Category Name\n\n{text}\nIf Your Batch Not Listed Then Enter Your Batch Name**")
                             
                                 try:
-                                    input2 = await bot.listen(chat_id=m.chat.id, filters=filters.user(user_id), timeout=50)
+                                    input2 = await bot.listen(chat_id=m.chat.id, filters=filters.user(user_id), timeout=120)
                                     raw_text2 = input2.text
                                     await input2.delete(True)
-                                except (TimeoutError, asyncio.TimeoutError):
+                                except ListenerTimeout:
                                     await editable.edit("**Timeout! You took too long to respond**")
                                     return
                                 except Exception as e:
@@ -997,10 +900,10 @@ async def process_cpwp(bot: Client, m: Message, user_id: int):
                                                 await editable.edit(f"**Send index number of the Batch to download.\n\n{text}**")
                                             
                                                 try:
-                                                    input3 = await bot.listen(chat_id=m.chat.id, filters=filters.user(user_id), timeout=50)
+                                                    input3 = await bot.listen(chat_id=m.chat.id, filters=filters.user(user_id), timeout=120)
                                                     raw_text3 = input3.text
                                                     await input3.delete(True)
-                                                except (TimeoutError, asyncio.TimeoutError):
+                                                except ListenerTimeout:
                                                     await editable.edit("**Timeout! You took too long to respond**")
                                                     return
                                                 except Exception as e:
@@ -1505,19 +1408,20 @@ async def appxwp_callback(bot, callback_query):
         await bot.send_message(callback_query.message.chat.id, f"**You Are Not Subscribed To This Bot\nContact - {owner_username}**")
         return
         
-    asyncio.create_task(process_appxwp(bot, callback_query.message, user_id))
+    THREADPOOL.submit(asyncio.run, process_appxwp(bot, callback_query.message, user_id))
 
 
 async def process_appxwp(bot: Client, m: Message, user_id: int):
 
-    CONNECTOR = aiohttp.TCPConnector(limit=100)
+    loop = asyncio.get_event_loop()
+    CONNECTOR = aiohttp.TCPConnector(limit=100, loop=loop)
 
-    async with aiohttp.ClientSession(connector=CONNECTOR) as session:
+    async with aiohttp.ClientSession(connector=CONNECTOR, loop=loop) as session:
         try:
             editable = await m.reply_text("**Enter App Name Or Api**")
 
             try:
-                input1 = await bot.listen(chat_id=m.chat.id, filters=filters.user(user_id), timeout=50)
+                input1 = await bot.listen(chat_id=m.chat.id, filters=filters.user(user_id), timeout=120)
                 api = input1.text
                 await input1.delete(True)
             except:
@@ -1541,7 +1445,7 @@ async def process_appxwp(bot: Client, m: Message, user_id: int):
                     await editable.edit(f"**Send index number of the Batch to download.\n\n{text}**")
 
                     try:
-                        input2 = await bot.listen(chat_id=m.chat.id, filters=filters.user(user_id), timeout=50)
+                        input2 = await bot.listen(chat_id=m.chat.id, filters=filters.user(user_id), timeout=120)
                         raw_text2 = input2.text
                         await input2.delete(True)
                     except:
@@ -1636,7 +1540,7 @@ async def process_appxwp(bot: Client, m: Message, user_id: int):
                 raise Exception("Did not found any course")
                 
             try:
-                input5 = await bot.listen(chat_id=m.chat.id, filters=filters.user(user_id), timeout=50)
+                input5 = await bot.listen(chat_id=m.chat.id, filters=filters.user(user_id), timeout=120)
                 raw_text5 = input5.text
                 await input5.delete(True)
             except:
@@ -1744,21 +1648,4 @@ async def process_appxwp(bot: Client, m: Message, user_id: int):
 
 
                                         
-
-# ─── Flask keep-alive server for Render ───────────────────────────────────────
-flask_app = Flask(__name__)
-
-@flask_app.route('/')
-def index():
-    return 'Bot is running!'
-
-def run_flask():
-    port = int(os.environ.get("PORT", 8000))
-    flask_app.run(host="0.0.0.0", port=port)
-
-# Start Flask in background thread so Render detects open port
-threading.Thread(target=run_flask, daemon=True).start()
-# ──────────────────────────────────────────────────────────────────────────────
-
 bot.run()
-

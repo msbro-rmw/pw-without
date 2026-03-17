@@ -1,7 +1,10 @@
 pyrogram==2.0.106
+PyWinCtl==0.3
 tgcrypto
 requests
-pyromod==1.5
+pyromod==3.1.6
+ffmpeg
+mediainfo
 cloudscraper
 beautifulsoup4==4.12.2
 bs4==0.0.2
@@ -14,8 +17,10 @@ websockets==12.0
 psutil
 colorama
 async-lru==2.0.4
+helper
 pyaes==1.6.1
 soupsieve==2.5
+py-tgcalls==1.2.9
 python-decouple==3.8
 Flask==3.0.3
 gunicorn==22.0.0
