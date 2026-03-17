@@ -1,3 +1,4 @@
+from flask import Flask
 import requests
 import asyncio
 import aiohttp
@@ -1646,6 +1647,20 @@ async def process_appxwp(bot: Client, m: Message, user_id: int):
                 await session.close()
             await CONNECTOR.close()
 
+# ─── Flask keep-alive server for Render ───────────────────────────────────────
+flask_app = Flask(__name__)
+
+@flask_app.route('/')
+def index():
+    return 'Bot is running!'
+
+def run_flask():
+    port = int(os.environ.get("PORT", 8000))
+    flask_app.run(host="0.0.0.0", port=port)
+
+# Start Flask in background thread so Render detects open port
+threading.Thread(target=run_flask, daemon=True).start()
+# ──────────────────────────────────────────────────────────────────────────────
 
                                         
 bot.run()
