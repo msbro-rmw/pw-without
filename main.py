@@ -1,9 +1,41 @@
 import asyncio
+import sys
+
 # Fix for Python 3.10+: create event loop before pyrogram import
 try:
     asyncio.get_event_loop()
 except RuntimeError:
     asyncio.set_event_loop(asyncio.new_event_loop())
+
+# Fix for Python 3.14+: pyromod Identifier.__annotations__ compatibility
+# In Python 3.14, instance __annotations__ is no longer auto-created,
+# causing pyromod callback_query_handler to crash on every button press.
+if sys.version_info >= (3, 14):
+    try:
+        import pyromod.types.identifier as _pyromod_id
+        _orig_matches = _pyromod_id.Identifier.matches
+
+        def _patched_matches(self, update):
+            # Collect __annotations__ from the class hierarchy and inject
+            # into the instance dict so the original method can find them
+            class_annotations = {}
+            for klass in reversed(type(self).__mro__):
+                class_annotations.update(
+                    vars(klass).get('__annotations__', {})
+                )
+            saved = self.__dict__.get('__annotations__')
+            self.__dict__['__annotations__'] = class_annotations
+            try:
+                return _orig_matches(self, update)
+            finally:
+                if saved is None:
+                    self.__dict__.pop('__annotations__', None)
+                else:
+                    self.__dict__['__annotations__'] = saved
+
+        _pyromod_id.Identifier.matches = _patched_matches
+    except Exception:
+        pass
 
 import requests
 import aiohttp
