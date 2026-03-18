@@ -106,24 +106,46 @@ async def start(bot, message):
 #    except:
 #        pass
         
-async def fetch_pwwp_data(session: aiohttp.ClientSession, url: str, headers: Dict = None, params: Dict = None, data: Dict = None, method: str = 'GET') -> Any:
+async def fetch_pwwp_data(
+    session: aiohttp.ClientSession,
+    url: str,
+    headers: Dict = None,
+    params: Dict = None,
+    data: Dict = None,
+    method: str = 'GET'
+) -> Any:
+
     max_retries = 3
+
     for attempt in range(max_retries):
         try:
-            async with session.request(method, url, headers=headers, params=params, json=data) as response:
+            async with session.request(
+                method,
+                url,
+                headers=headers,
+                params=params,
+                json=data,
+                timeout=aiohttp.ClientTimeout(total=10)
+            ) as response:
+
                 response.raise_for_status()
                 return await response.json()
+
+        except asyncio.TimeoutError:
+            logging.error(f"Attempt {attempt + 1} failed: Timeout fetching {url}")
+
         except aiohttp.ClientError as e:
             logging.error(f"Attempt {attempt + 1} failed: aiohttp error fetching {url}: {e}")
+
         except Exception as e:
             logging.exception(f"Attempt {attempt + 1} failed: Unexpected error fetching {url}: {e}")
 
         if attempt < max_retries - 1:
-            await asyncio.sleep(90 ** attempt)
-        else:
-            logging.error(f"Failed to fetch {url} after {max_retries} attempts.")
-            return None
+            await asyncio.sleep(2)
 
+    logging.error(f"Failed to fetch {url} after {max_retries} attempts.")
+    return None
+    await callback_query.answer()
 
 async def process_pwwp_chapter_content(session: aiohttp.ClientSession, chapter_id, selected_batch_id, subject_id, schedule_id, content_type, headers: Dict):
     url = f"https://api.penpencil.co/v1/batches/{selected_batch_id}/subject/{subject_id}/schedule/{schedule_id}/schedule-details"
