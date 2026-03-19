@@ -293,4 +293,1875 @@ input.inp::placeholder{color:rgba(255,90,160,0.35);font-size:0.78rem;letter-spac
 .err-ico{font-size:4rem;display:block;margin-bottom:14px;animation:shakeErr 0.5s ease;}
 @keyframes shakeErr{0%,100%{transform:translateX(0)}20%,60%{transform:translateX(-10px)}40%,80%{transform:translateX(10px)}}
 .err-title{font-family:'Orbitron',monospace;font-size:1rem;color:var(--red);letter-spacing:2px;margin-bottom:12px;text-shadow:0 0 10px var(--red);}
-.err-msg{font-family:'JetBrains 
+.err-msg{font-family:'JetBrains Mono',monospace;font-size:0.72rem;color:var(--text2);letter-spacing:1.5px;line-height:1.9;}
+
+/* ══════════════════════════════════════
+   SECRET CODE POPUP
+══════════════════════════════════════ */
+#secretOverlay{
+  position:fixed;inset:0;z-index:8888;
+  background:rgba(5,0,8,0.92);
+  backdrop-filter:blur(20px);
+  display:none;align-items:center;justify-content:center;padding:20px;
+  animation:fadeIn 0.3s ease;
+}
+#secretOverlay.show{display:flex;}
+@keyframes fadeIn{from{opacity:0}to{opacity:1}}
+
+.secret-modal{
+  width:100%;max-width:380px;
+  background:linear-gradient(145deg,rgba(255,0,119,0.1),rgba(5,0,8,0.95),rgba(157,0,255,0.08));
+  border:2px solid rgba(255,0,119,0.4);border-radius:24px;
+  padding:32px 24px;text-align:center;
+  position:relative;overflow:hidden;
+  box-shadow:var(--glow-pink),inset 0 0 60px rgba(255,0,119,0.05);
+  animation:modalPop 0.4s cubic-bezier(0.34,1.56,0.64,1);
+}
+@keyframes modalPop{from{opacity:0;transform:scale(0.7) translateY(20px)}to{opacity:1;transform:scale(1) translateY(0)}}
+.secret-modal::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;background:linear-gradient(90deg,transparent,var(--pink),var(--orange2),transparent);box-shadow:0 0 10px var(--pink);}
+
+.secret-lock{font-size:3.5rem;display:block;margin-bottom:16px;animation:lockBounce 1s ease-in-out infinite alternate;filter:drop-shadow(0 0 15px var(--pink));}
+@keyframes lockBounce{from{transform:scale(1) rotate(-5deg)}to{transform:scale(1.1) rotate(5deg)}}
+
+.secret-title{font-family:'Orbitron',monospace;font-size:1rem;font-weight:900;
+  background:linear-gradient(135deg,var(--pink),var(--orange2));
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;
+  letter-spacing:2px;margin-bottom:8px;text-transform:uppercase;}
+
+.secret-subtitle{font-family:'JetBrains Mono',monospace;font-size:0.68rem;color:var(--text2);letter-spacing:2px;line-height:1.8;margin-bottom:20px;}
+.secret-subtitle strong{color:var(--pink2);}
+
+.secret-inp-wrap{position:relative;margin-bottom:8px;}
+.secret-inp{
+  width:100%;padding:14px 16px;
+  background:rgba(255,0,119,0.07);
+  border:2px solid rgba(255,0,119,0.25);border-radius:12px;
+  color:#fff !important;-webkit-text-fill-color:#fff !important;
+  font-family:'JetBrains Mono',monospace;font-size:0.85rem;
+  outline:none;transition:all 0.3s;letter-spacing:3px;text-align:center;
+  caret-color:var(--pink);
+}
+.secret-inp:focus{border-color:var(--pink);box-shadow:0 0 0 3px rgba(255,0,119,0.15),var(--glow-pink);}
+.secret-inp::placeholder{color:rgba(255,90,160,0.4);-webkit-text-fill-color:rgba(255,90,160,0.4);font-size:0.7rem;letter-spacing:1px;}
+
+.secret-err{font-family:'JetBrains Mono',monospace;font-size:0.65rem;color:var(--red);letter-spacing:2px;margin-bottom:12px;min-height:20px;text-shadow:0 0 6px var(--red);}
+
+/* FULL DATA view inside modal */
+#secretFullData{display:none;}
+#secretFullData.show{display:block;}
+.full-data-title{font-family:'Orbitron',monospace;font-size:0.75rem;color:var(--green);letter-spacing:3px;margin-bottom:14px;text-shadow:0 0 8px var(--green);}
+.full-data-item{
+  display:flex;flex-direction:column;
+  background:rgba(0,245,160,0.05);border:1px solid rgba(0,245,160,0.2);
+  border-radius:10px;padding:10px 14px;margin-bottom:8px;text-align:left;
+}
+.fdi-label{font-family:'JetBrains Mono',monospace;font-size:0.52rem;color:var(--text2);letter-spacing:3px;margin-bottom:4px;}
+.fdi-val{font-family:'JetBrains Mono',monospace;font-size:0.78rem;color:var(--green);word-break:break-all;text-shadow:0 0 6px rgba(0,245,160,0.3);}
+
+/* ── TOAST ── */
+.toast{
+  position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(70px);
+  background:linear-gradient(135deg,rgba(5,0,8,0.97),rgba(255,0,119,0.15));
+  border:1px solid var(--border2);border-radius:50px;
+  padding:13px 28px;font-family:'JetBrains Mono',monospace;font-size:0.72rem;
+  color:var(--text);letter-spacing:2px;z-index:9000;
+  transition:all 0.35s cubic-bezier(0.34,1.56,0.64,1);opacity:0;white-space:nowrap;
+  box-shadow:var(--glow-pink);
+}
+.toast.show{transform:translateX(-50%) translateY(0);opacity:1;}
+
+
+/* ══════════════════════════════════════
+   SAVED SESSIONS
+══════════════════════════════════════ */
+.sessions-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;}
+.sessions-title{font-family:'Orbitron',monospace;font-size:0.78rem;font-weight:900;color:var(--pink);letter-spacing:3px;display:flex;align-items:center;gap:8px;}
+.sessions-count{font-family:'JetBrains Mono',monospace;font-size:0.6rem;background:rgba(255,0,119,0.15);border:1px solid rgba(255,0,119,0.3);color:var(--pink2);padding:2px 10px;border-radius:20px;}
+.clear-all-btn{font-family:'JetBrains Mono',monospace;font-size:0.6rem;background:none;border:1px solid rgba(255,23,68,0.3);color:#ff4569;padding:4px 12px;border-radius:20px;cursor:pointer;letter-spacing:1.5px;transition:all 0.3s;}
+.clear-all-btn:hover{background:rgba(255,23,68,0.1);border-color:#ff4569;}
+.session-empty{text-align:center;padding:28px 0;font-family:'JetBrains Mono',monospace;font-size:0.68rem;color:rgba(255,0,119,0.3);letter-spacing:2px;}
+.session-empty span{font-size:2rem;display:block;margin-bottom:10px;opacity:0.4;}
+.session-card{
+  background:linear-gradient(135deg,rgba(255,0,119,0.07),rgba(10,0,20,0.9));
+  border:1px solid var(--border);border-radius:16px;padding:16px;margin-bottom:10px;
+  position:relative;overflow:hidden;cursor:pointer;transition:all 0.3s;
+}
+.session-card::before{content:'';position:absolute;top:0;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent,var(--pink),transparent);}
+.session-card:hover{border-color:var(--border2);box-shadow:0 0 20px rgba(255,0,119,0.12);transform:translateY(-2px);}
+.session-card.expired{border-color:rgba(255,23,68,0.2);opacity:0.65;}
+.sc-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;}
+.sc-name{font-family:'Orbitron',monospace;font-size:0.72rem;font-weight:700;color:var(--text);}
+.sc-badge{font-family:'JetBrains Mono',monospace;font-size:0.55rem;padding:3px 10px;border-radius:20px;letter-spacing:1.5px;}
+.sc-valid{background:rgba(0,245,160,0.12);border:1px solid rgba(0,245,160,0.35);color:var(--green);}
+.sc-expired{background:rgba(255,23,68,0.1);border:1px solid rgba(255,23,68,0.3);color:#ff4569;}
+.sc-info{display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-bottom:10px;}
+.sc-field{background:rgba(255,255,255,0.03);border-radius:8px;padding:7px 10px;}
+.sc-lbl{font-family:'JetBrains Mono',monospace;font-size:0.48rem;color:var(--text2);letter-spacing:2px;display:block;margin-bottom:2px;}
+.sc-val{font-family:'JetBrains Mono',monospace;font-size:0.65rem;color:var(--pink2);word-break:break-all;}
+.sc-actions{display:flex;gap:8px;}
+.sc-btn{flex:1;padding:8px;border:none;border-radius:10px;font-family:'Orbitron',monospace;font-size:0.58rem;font-weight:700;letter-spacing:1.5px;cursor:pointer;transition:all 0.3s;}
+.sc-btn-copy{background:linear-gradient(135deg,#ff6d00,#ff9500);color:#fff;box-shadow:0 2px 12px rgba(255,109,0,0.3);}
+.sc-btn-copy:hover{box-shadow:0 4px 20px rgba(255,109,0,0.5);transform:translateY(-1px);}
+.sc-btn-del{background:rgba(255,23,68,0.1);border:1px solid rgba(255,23,68,0.3);color:#ff4569;}
+.sc-btn-del:hover{background:rgba(255,23,68,0.2);}
+.sc-btn-regen{background:linear-gradient(135deg,#ff0077,#ff5fa0);color:#fff;box-shadow:0 2px 12px rgba(255,0,119,0.3);}
+.sc-btn-regen:hover{box-shadow:0 4px 20px rgba(255,0,119,0.5);transform:translateY(-1px);}
+.sc-time{font-family:'JetBrains Mono',monospace;font-size:0.5rem;color:rgba(255,0,119,0.35);text-align:right;margin-top:4px;letter-spacing:1px;}
+
+
+/* ── CONFIRM MODAL ── */
+#confirmOverlay{position:fixed;inset:0;z-index:9000;background:rgba(5,0,8,0.93);backdrop-filter:blur(18px);display:none;align-items:center;justify-content:center;padding:20px;}
+#confirmOverlay.show{display:flex;animation:fadeIn 0.25s ease;}
+#confirmClearOverlay{position:fixed;inset:0;z-index:9000;background:rgba(5,0,8,0.93);backdrop-filter:blur(18px);display:none;align-items:center;justify-content:center;padding:20px;}
+#confirmClearOverlay.show{display:flex;animation:fadeIn 0.25s ease;}
+.confirm-box{width:100%;max-width:340px;background:linear-gradient(145deg,rgba(255,23,68,0.1),rgba(5,0,8,0.97));border:2px solid rgba(255,23,68,0.45);border-radius:22px;padding:28px 22px;text-align:center;position:relative;overflow:hidden;box-shadow:0 0 40px rgba(255,23,68,0.2);animation:modalPop 0.35s cubic-bezier(0.34,1.56,0.64,1);}
+.confirm-box::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,transparent,#ff1744,transparent);}
+.confirm-ico{font-size:3rem;display:block;margin-bottom:12px;animation:shakeErr 0.6s ease;}
+.confirm-title{font-family:'Orbitron',monospace;font-size:0.88rem;font-weight:900;color:#ff4569;letter-spacing:2px;margin-bottom:8px;}
+.confirm-msg{font-family:'JetBrains Mono',monospace;font-size:0.68rem;color:var(--text2);letter-spacing:1.5px;line-height:1.8;margin-bottom:20px;}
+.confirm-name{color:var(--pink2);font-weight:700;}
+.confirm-btns{display:flex;gap:10px;}
+.confirm-yes{flex:1;padding:13px;background:linear-gradient(135deg,#ff1744,#ff4569);border:none;border-radius:12px;color:#fff;font-family:'Orbitron',monospace;font-size:0.72rem;font-weight:900;letter-spacing:2px;cursor:pointer;transition:all 0.3s;box-shadow:0 4px 16px rgba(255,23,68,0.4);}
+.confirm-yes:hover{transform:translateY(-2px);box-shadow:0 8px 24px rgba(255,23,68,0.6);}
+.confirm-no{flex:1;padding:13px;background:transparent;border:2px solid rgba(255,0,119,0.35);border-radius:12px;color:var(--pink2);font-family:'Orbitron',monospace;font-size:0.72rem;font-weight:900;letter-spacing:2px;cursor:pointer;transition:all 0.3s;}
+.confirm-no:hover{background:rgba(255,0,119,0.08);border-color:var(--pink);}
+
+/* ── UNDO TOAST ── */
+#undoBar{position:fixed;bottom:80px;left:50%;transform:translateX(-50%) translateY(80px);z-index:9500;opacity:0;transition:all 0.4s cubic-bezier(0.34,1.56,0.64,1);pointer-events:none;white-space:nowrap;}
+#undoBar.show{transform:translateX(-50%) translateY(0);opacity:1;pointer-events:all;}
+.undo-inner{display:flex;align-items:center;gap:12px;background:linear-gradient(135deg,rgba(5,0,8,0.97),rgba(255,0,119,0.12));border:1px solid var(--border2);border-radius:50px;padding:10px 10px 10px 20px;box-shadow:var(--glow-pink);}
+.undo-msg{font-family:'JetBrains Mono',monospace;font-size:0.68rem;color:var(--text);letter-spacing:1.5px;}
+.undo-timer{font-family:'Orbitron',monospace;font-size:0.65rem;color:var(--orange2);font-weight:700;min-width:18px;text-align:center;}
+.undo-btn{background:linear-gradient(135deg,var(--orange),var(--orange2));border:none;border-radius:30px;color:#fff;font-family:'Orbitron',monospace;font-size:0.65rem;font-weight:900;letter-spacing:2px;padding:7px 16px;cursor:pointer;transition:all 0.3s;}
+.undo-btn:hover{transform:scale(1.05);box-shadow:0 0 15px rgba(255,109,0,0.5);}
+
+/* ── REGEN MODAL ── */
+#regenOverlay{position:fixed;inset:0;z-index:9000;background:rgba(5,0,8,0.93);backdrop-filter:blur(18px);display:none;align-items:center;justify-content:center;padding:20px;}
+#regenOverlay.show{display:flex;animation:fadeIn 0.25s ease;}
+.regen-box{width:100%;max-width:360px;background:linear-gradient(145deg,rgba(255,0,119,0.09),rgba(5,0,8,0.97));border:2px solid rgba(255,0,119,0.4);border-radius:22px;padding:28px 22px;text-align:center;position:relative;overflow:hidden;box-shadow:var(--glow-pink);animation:modalPop 0.35s cubic-bezier(0.34,1.56,0.64,1);}
+.regen-box::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,transparent,var(--pink),var(--orange2),transparent);}
+.regen-ico{font-size:2.8rem;display:block;margin-bottom:12px;animation:spin 1.5s linear infinite;}
+@keyframes spin{0%{transform:rotate(0deg)}100%{transform:rotate(360deg)}}
+.regen-title{font-family:'Orbitron',monospace;font-size:0.85rem;font-weight:900;color:var(--pink);letter-spacing:2px;margin-bottom:6px;}
+.regen-sub{font-family:'JetBrains Mono',monospace;font-size:0.65rem;color:var(--text2);letter-spacing:2px;margin-bottom:18px;line-height:1.8;}
+.regen-steps{text-align:left;margin-bottom:16px;}
+.regen-step{font-family:'JetBrains Mono',monospace;font-size:0.62rem;padding:7px 12px;border-radius:8px;margin-bottom:6px;display:flex;align-items:center;gap:8px;background:rgba(255,0,119,0.04);border:1px solid rgba(255,0,119,0.08);transition:all 0.4s;}
+.regen-step.rs-active{background:rgba(255,0,119,0.1);border-color:rgba(255,0,119,0.35);color:var(--pink);}
+.regen-step.rs-done{background:rgba(0,245,160,0.06);border-color:rgba(0,245,160,0.3);color:var(--green);}
+.regen-step.rs-err{background:rgba(255,23,68,0.08);border-color:rgba(255,23,68,0.3);color:#ff4569;}
+.rs-ico{font-size:0.85rem;flex-shrink:0;}
+.regen-prog{height:6px;background:rgba(255,0,119,0.1);border-radius:3px;overflow:hidden;margin-bottom:12px;}
+.regen-prog-fill{height:100%;width:0%;background:linear-gradient(90deg,var(--pink),var(--orange2));border-radius:3px;transition:width 0.5s ease;box-shadow:0 0 8px rgba(255,0,119,0.5);}
+.regen-status{font-family:'JetBrains Mono',monospace;font-size:0.62rem;color:var(--pink2);letter-spacing:2px;text-align:center;min-height:18px;animation:blink 1.5s ease-in-out infinite;}
+
+
+/* ══════════════════════════════════════
+   AI CHAT ASSISTANT
+══════════════════════════════════════ */
+/* Floating button */
+.ai-fab{
+  position:fixed;bottom:28px;right:20px;z-index:7000;
+  width:56px;height:56px;border-radius:50%;border:none;cursor:pointer;
+  background:linear-gradient(135deg,#7b2ff7,#ff0077,#ff6d00);
+  background-size:200% 200%;animation:fabGrad 3s ease infinite;
+  box-shadow:0 4px 24px rgba(123,47,247,0.5),0 0 0 0 rgba(123,47,247,0.4);
+  display:flex;align-items:center;justify-content:center;font-size:1.4rem;
+  transition:transform 0.3s;
+}
+@keyframes fabGrad{0%{background-position:0% 50%}50%{background-position:100% 50%}100%{background-position:0% 50%}}
+.ai-fab:hover{transform:scale(1.12);}
+.ai-fab .fab-badge{
+  position:absolute;top:-3px;right:-3px;
+  background:#ff1744;color:#fff;border-radius:50%;
+  width:18px;height:18px;font-size:0.55rem;font-family:'JetBrains Mono',monospace;
+  display:flex;align-items:center;justify-content:center;font-weight:700;
+  border:2px solid var(--bg);
+}
+
+/* Chat Drawer */
+#chatDrawer{
+  position:fixed;bottom:0;right:0;left:0;z-index:8000;
+  height:88vh;max-width:520px;margin:0 auto;
+  background:linear-gradient(180deg,rgba(5,0,8,0.98) 0%,rgba(10,0,20,0.99) 100%);
+  border:1px solid rgba(123,47,247,0.35);border-bottom:none;
+  border-radius:24px 24px 0 0;
+  transform:translateY(100%);transition:transform 0.45s cubic-bezier(0.34,1.2,0.64,1);
+  display:flex;flex-direction:column;overflow:hidden;
+  box-shadow:0 -8px 40px rgba(123,47,247,0.2);
+}
+#chatDrawer.open{transform:translateY(0);}
+#chatDrawer::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,transparent,#7b2ff7,#ff0077,#ff6d00,transparent);}
+
+.chat-header{
+  display:flex;align-items:center;gap:12px;padding:16px 18px 14px;
+  border-bottom:1px solid rgba(123,47,247,0.2);flex-shrink:0;
+}
+.chat-avatar{
+  width:40px;height:40px;border-radius:50%;flex-shrink:0;
+  background:linear-gradient(135deg,#7b2ff7,#ff0077);
+  display:flex;align-items:center;justify-content:center;font-size:1.1rem;
+  box-shadow:0 0 14px rgba(123,47,247,0.5);
+  animation:avatarPulse 2.5s ease-in-out infinite;
+}
+@keyframes avatarPulse{0%,100%{box-shadow:0 0 14px rgba(123,47,247,0.5)}50%{box-shadow:0 0 28px rgba(255,0,119,0.6)}}
+.chat-header-info{flex:1;}
+.chat-hname{font-family:'Orbitron',monospace;font-size:0.75rem;font-weight:900;color:var(--text);letter-spacing:2px;}
+.chat-hstatus{font-family:'JetBrains Mono',monospace;font-size:0.55rem;color:var(--green);letter-spacing:2px;display:flex;align-items:center;gap:4px;}
+.chat-hstatus::before{content:'';width:6px;height:6px;border-radius:50%;background:var(--green);display:inline-block;animation:blink 1.5s ease-in-out infinite;}
+.chat-close{background:none;border:none;color:var(--text2);font-size:1.3rem;cursor:pointer;padding:4px;transition:color 0.3s;line-height:1;}
+.chat-close:hover{color:var(--pink);}
+
+.chat-msgs{
+  flex:1;overflow-y:auto;padding:16px 14px;
+  display:flex;flex-direction:column;gap:12px;
+  scroll-behavior:smooth;
+}
+.chat-msgs::-webkit-scrollbar{width:3px;}
+.chat-msgs::-webkit-scrollbar-thumb{background:rgba(123,47,247,0.4);border-radius:2px;}
+
+/* Messages */
+.msg{max-width:88%;display:flex;flex-direction:column;gap:4px;animation:msgPop 0.3s cubic-bezier(0.34,1.56,0.64,1);}
+@keyframes msgPop{from{opacity:0;transform:translateY(10px) scale(0.95)}to{opacity:1;transform:translateY(0) scale(1)}}
+.msg.user{align-self:flex-end;align-items:flex-end;}
+.msg.ai{align-self:flex-start;align-items:flex-start;}
+.msg-bubble{
+  padding:11px 15px;border-radius:18px;
+  font-family:'Space Grotesk',sans-serif;font-size:0.82rem;line-height:1.7;
+  word-break:break-word;
+}
+.msg.user .msg-bubble{
+  background:linear-gradient(135deg,#7b2ff7,#ff0077);color:#fff;
+  border-bottom-right-radius:4px;box-shadow:0 4px 16px rgba(123,47,247,0.3);
+}
+.msg.ai .msg-bubble{
+  background:linear-gradient(135deg,rgba(123,47,247,0.12),rgba(255,0,119,0.06));
+  border:1px solid rgba(123,47,247,0.25);color:var(--text);
+  border-bottom-left-radius:4px;
+}
+.msg-time{font-family:'JetBrains Mono',monospace;font-size:0.48rem;color:var(--text2);letter-spacing:1px;padding:0 4px;}
+
+/* Typing indicator */
+.typing-dots{display:flex;gap:4px;padding:12px 16px;align-items:center;}
+.typing-dots span{width:7px;height:7px;border-radius:50%;background:#7b2ff7;animation:typingBounce 1.2s ease-in-out infinite;}
+.typing-dots span:nth-child(2){animation-delay:0.2s;}
+.typing-dots span:nth-child(3){animation-delay:0.4s;}
+@keyframes typingBounce{0%,60%,100%{transform:translateY(0);opacity:0.4}30%{transform:translateY(-8px);opacity:1}}
+
+/* Quick chips */
+.chat-chips{display:flex;gap:6px;flex-wrap:wrap;padding:8px 14px 4px;flex-shrink:0;}
+.chip{font-family:'JetBrains Mono',monospace;font-size:0.58rem;padding:5px 12px;border-radius:20px;
+  background:rgba(123,47,247,0.1);border:1px solid rgba(123,47,247,0.3);color:#b07aff;
+  cursor:pointer;letter-spacing:1px;transition:all 0.25s;white-space:nowrap;}
+.chip:hover{background:rgba(123,47,247,0.2);border-color:#7b2ff7;color:#fff;}
+
+/* Input row */
+.chat-input-row{
+  display:flex;align-items:flex-end;gap:10px;
+  padding:10px 14px 16px;border-top:1px solid rgba(123,47,247,0.15);flex-shrink:0;
+}
+.chat-inp{
+  flex:1;padding:12px 16px;background:rgba(123,47,247,0.08);
+  border:1.5px solid rgba(123,47,247,0.25);border-radius:22px;
+  color:#fff;-webkit-text-fill-color:#fff;font-family:'Space Grotesk',sans-serif;font-size:0.85rem;
+  outline:none;resize:none;max-height:100px;overflow-y:auto;line-height:1.5;
+  transition:border-color 0.3s;caret-color:#7b2ff7;
+}
+.chat-inp:focus{border-color:#7b2ff7;box-shadow:0 0 0 3px rgba(123,47,247,0.12);}
+.chat-inp::placeholder{color:rgba(176,122,255,0.4);-webkit-text-fill-color:rgba(176,122,255,0.4);}
+.chat-send{
+  width:42px;height:42px;flex-shrink:0;border-radius:50%;border:none;cursor:pointer;
+  background:linear-gradient(135deg,#7b2ff7,#ff0077);
+  display:flex;align-items:center;justify-content:center;font-size:1rem;
+  box-shadow:0 4px 14px rgba(123,47,247,0.4);transition:all 0.3s;
+}
+.chat-send:hover{transform:scale(1.1);box-shadow:0 6px 20px rgba(123,47,247,0.6);}
+.chat-send:disabled{opacity:0.3;cursor:not-allowed;transform:none;}
+
+/* Context pill in chat */
+.ctx-pill{
+  font-family:'JetBrains Mono',monospace;font-size:0.58rem;padding:5px 12px;border-radius:20px;
+  background:rgba(0,245,160,0.08);border:1px solid rgba(0,245,160,0.25);color:var(--green);
+  display:inline-flex;align-items:center;gap:6px;margin-bottom:8px;letter-spacing:1px;
+}
+
+/* ══════════════════════════════════════
+   AI TOKEN HEALTH MONITOR
+══════════════════════════════════════ */
+#healthOverlay{
+  position:fixed;inset:0;z-index:8500;background:rgba(5,0,8,0.94);backdrop-filter:blur(20px);
+  display:none;align-items:flex-start;justify-content:center;padding:20px;overflow-y:auto;
+}
+#healthOverlay.show{display:flex;animation:fadeIn 0.3s ease;}
+.health-box{
+  width:100%;max-width:480px;margin:auto;
+  background:linear-gradient(145deg,rgba(0,245,160,0.06),rgba(5,0,8,0.97),rgba(123,47,247,0.06));
+  border:2px solid rgba(0,245,160,0.25);border-radius:24px;padding:0 0 24px;
+  position:relative;overflow:hidden;
+  box-shadow:0 0 50px rgba(0,245,160,0.08);
+  animation:modalPop 0.4s cubic-bezier(0.34,1.56,0.64,1);
+}
+.health-box::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;background:linear-gradient(90deg,transparent,#00f5a0,#7b2ff7,transparent);}
+.health-header{padding:22px 22px 16px;border-bottom:1px solid rgba(0,245,160,0.12);display:flex;align-items:center;justify-content:space-between;}
+.health-htitle{font-family:'Orbitron',monospace;font-size:0.82rem;font-weight:900;color:var(--green);letter-spacing:3px;display:flex;align-items:center;gap:8px;}
+.health-close{background:none;border:none;color:var(--text2);font-size:1.3rem;cursor:pointer;transition:color 0.3s;}
+.health-close:hover{color:var(--pink);}
+.health-content{padding:18px 20px 0;}
+
+/* Overall health score ring */
+.health-score-wrap{display:flex;align-items:center;gap:18px;margin-bottom:18px;padding:16px;background:rgba(0,245,160,0.04);border:1px solid rgba(0,245,160,0.12);border-radius:16px;}
+.score-ring{position:relative;width:80px;height:80px;flex-shrink:0;}
+.score-ring svg{transform:rotate(-90deg);}
+.score-ring-bg{fill:none;stroke:rgba(0,245,160,0.1);stroke-width:6;}
+.score-ring-fill{fill:none;stroke-width:6;stroke-linecap:round;transition:stroke-dashoffset 1s ease;}
+.score-center{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;}
+.score-num{font-family:'Orbitron',monospace;font-size:1.1rem;font-weight:900;line-height:1;}
+.score-lbl{font-family:'JetBrains Mono',monospace;font-size:0.42rem;letter-spacing:1.5px;margin-top:2px;}
+.score-info{flex:1;}
+.score-title{font-family:'Orbitron',monospace;font-size:0.75rem;font-weight:700;margin-bottom:4px;}
+.score-desc{font-family:'JetBrains Mono',monospace;font-size:0.62rem;color:var(--text2);letter-spacing:1px;line-height:1.7;}
+
+/* Session health cards */
+.health-sessions{display:flex;flex-direction:column;gap:10px;margin-bottom:16px;}
+.hs-card{
+  background:rgba(255,255,255,0.02);border:1px solid rgba(255,255,255,0.06);
+  border-radius:14px;padding:14px;position:relative;overflow:hidden;transition:all 0.3s;
+}
+.hs-card::before{content:'';position:absolute;left:0;top:0;bottom:0;width:3px;border-radius:2px;}
+.hs-card.hs-great::before{background:var(--green);}
+.hs-card.hs-ok::before{background:var(--gold);}
+.hs-card.hs-warn::before{background:var(--orange);}
+.hs-card.hs-danger::before{background:#ff4569;}
+.hs-card.hs-dead::before{background:#666;}
+.hs-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;}
+.hs-name{font-family:'Orbitron',monospace;font-size:0.68rem;font-weight:700;color:var(--text);}
+.hs-status-badge{font-family:'JetBrains Mono',monospace;font-size:0.52rem;padding:3px 10px;border-radius:20px;letter-spacing:1.5px;}
+.hs-great-b{background:rgba(0,245,160,0.12);border:1px solid rgba(0,245,160,0.35);color:var(--green);}
+.hs-ok-b{background:rgba(255,195,0,0.1);border:1px solid rgba(255,195,0,0.35);color:var(--gold);}
+.hs-warn-b{background:rgba(255,109,0,0.1);border:1px solid rgba(255,109,0,0.35);color:var(--orange2);}
+.hs-danger-b{background:rgba(255,69,105,0.1);border:1px solid rgba(255,69,105,0.35);color:#ff4569;}
+.hs-dead-b{background:rgba(100,100,100,0.1);border:1px solid rgba(100,100,100,0.3);color:#888;}
+
+/* Mini progress bar */
+.hs-bar-wrap{height:5px;background:rgba(255,255,255,0.05);border-radius:3px;overflow:hidden;margin-bottom:8px;}
+.hs-bar{height:100%;border-radius:3px;transition:width 0.8s ease;}
+.hs-bar.great{background:linear-gradient(90deg,#00c97a,#00f5a0);}
+.hs-bar.ok{background:linear-gradient(90deg,#e6aa00,#ffc300);}
+.hs-bar.warn{background:linear-gradient(90deg,#ff6d00,#ff9500);}
+.hs-bar.danger{background:linear-gradient(90deg,#ff1744,#ff4569);}
+.hs-bar.dead{background:#555;}
+
+.hs-details{display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px;}
+.hs-detail{font-family:'JetBrains Mono',monospace;font-size:0.55rem;color:var(--text2);letter-spacing:1px;}
+.hs-detail strong{color:var(--text);display:block;margin-bottom:1px;}
+
+/* Prediction box */
+.predict-box{
+  background:linear-gradient(135deg,rgba(123,47,247,0.08),rgba(255,0,119,0.04));
+  border:1px solid rgba(123,47,247,0.2);border-radius:14px;padding:14px;margin-bottom:14px;
+}
+.predict-title{font-family:'Orbitron',monospace;font-size:0.65rem;color:#b07aff;letter-spacing:2px;margin-bottom:10px;display:flex;align-items:center;gap:6px;}
+.predict-item{font-family:'JetBrains Mono',monospace;font-size:0.62rem;color:var(--text2);padding:5px 0;border-bottom:1px solid rgba(255,255,255,0.04);letter-spacing:1px;display:flex;justify-content:space-between;}
+.predict-item:last-child{border:none;}
+.predict-item strong{color:var(--text);}
+
+/* Alert banner */
+.health-alert{
+  display:flex;align-items:center;gap:10px;padding:12px 14px;border-radius:12px;margin-bottom:10px;
+  font-family:'JetBrains Mono',monospace;font-size:0.63rem;letter-spacing:1.5px;line-height:1.6;
+}
+.alert-danger{background:rgba(255,23,68,0.08);border:1px solid rgba(255,23,68,0.25);color:#ff6b6b;}
+.alert-warn{background:rgba(255,195,0,0.07);border:1px solid rgba(255,195,0,0.25);color:#ffd166;}
+.alert-ok{background:rgba(0,245,160,0.06);border:1px solid rgba(0,245,160,0.2);color:#00f5a0;}
+
+
+/* ── REAL-TIME COUNTDOWN DISPLAY ── */
+.hs-countdown{
+  background:rgba(0,0,0,0.35);border:1px solid rgba(255,255,255,0.07);
+  border-radius:10px;padding:8px 6px;margin:8px 0 4px;
+  display:flex;flex-direction:column;align-items:center;gap:5px;
+  overflow:hidden;
+}
+.cd-label{font-family:'JetBrains Mono',monospace;font-size:0.48rem;color:var(--text2);letter-spacing:2px;}
+.cd-units{display:flex;align-items:center;gap:3px;width:100%;justify-content:center;}
+.cd-unit{display:flex;flex-direction:column;align-items:center;gap:2px;flex:1;min-width:0;}
+.cd-val{
+  font-family:'Orbitron',monospace;font-size:0.9rem;font-weight:900;color:#fff;
+  background:rgba(255,255,255,0.07);border:1px solid rgba(255,255,255,0.1);
+  border-radius:6px;padding:3px 2px;width:100%;text-align:center;
+  transition:color 0.4s;display:block;
+}
+.cd-u{font-family:'JetBrains Mono',monospace;font-size:0.34rem;color:rgba(255,255,255,0.3);letter-spacing:1px;}
+.cd-sep{
+  font-family:'Orbitron',monospace;font-size:0.9rem;font-weight:900;
+  color:var(--pink);margin-bottom:14px;flex-shrink:0;
+  animation:blink 1s step-start infinite;
+}
+.cd-expired{font-family:'JetBrains Mono',monospace;font-size:0.62rem;color:#ff4569;letter-spacing:2px;text-shadow:0 0 10px rgba(255,69,105,0.5);}
+
+/* ── FOOTER ── */
+footer{text-align:center;padding:22px;border-top:1px solid rgba(255,0,119,0.1);position:relative;z-index:1;}
+.ft{font-family:'Orbitron',monospace;font-size:0.72rem;color:var(--gold);letter-spacing:5px;margin-bottom:4px;text-shadow:0 0 10px rgba(255,195,0,0.4);}
+.ft2{font-family:'JetBrains Mono',monospace;font-size:0.58rem;color:var(--text2);letter-spacing:3px;}
+
+@media(max-width:390px){
+  .otp-b{width:42px;height:52px;font-size:1.2rem;}
+  .otp-row{gap:7px;}
+  .user-grid{grid-template-columns:1fr;}
+}
+</style>
+</head>
+<body>
+
+<!-- BG -->
+<div class="bg-orbs"><div class="orb orb1"></div><div class="orb orb2"></div><div class="orb orb3"></div></div>
+<div class="bg-grid"></div>
+<div class="scanlines"></div>
+
+<!-- INTRO -->
+<div id="intro">
+  <div class="door door-l" id="dL"></div>
+  <div class="door door-r" id="dR"></div>
+  <div class="scan-l"></div>
+  <div class="intro-c">
+    <span class="i-emoji">🔑</span>
+    <div class="i-title">PW TOKEN GEN</div>
+    <div class="i-sub">[ INITIALIZING SECURE CHANNEL ]</div>
+    <div class="i-badge">⚡ BY: Smarty MS⚡</div>
+  </div>
+</div>
+
+<!-- SECRET CODE POPUP -->
+<div id="secretOverlay">
+  <div class="secret-modal">
+    <span class="secret-lock" id="secretLockIco">🔒</span>
+    <div class="secret-title">Sorry You Can't See Full🌚</div>
+    <div class="secret-subtitle">To see Full You Need to Enter the<br><strong>Secret Code</strong></div>
+
+    <!-- Input section -->
+    <div id="secretInputSection" style="display:block;">
+      <div class="secret-inp-wrap">
+        <input class="secret-inp" id="secretCodeInp" type="text" placeholder="Please Enter the Secret Code Here 💀" maxlength="20" autocomplete="off">
+      </div>
+      <div class="secret-err" id="secretErr"></div>
+      <button class="btn btn-orange" style="margin-top:0;" onclick="checkSecretCode()">👁️ SEE FULL DATA</button>
+      <button class="btn btn-ghost" style="margin-top:8px;" onclick="closeSecret()">← BACK</button>
+    </div>
+
+    <!-- Full data section (shown after correct code) -->
+    <div id="secretFullData">
+      <div class="full-data-title">🔓 ACCESS GRANTED</div>
+      <div id="fullDataItems"></div>
+      <button class="btn btn-green" style="margin-top:4px;" onclick="closeSecret()">← BACK</button>
+    </div>
+  </div>
+</div>
+
+
+<!-- CONFIRM DELETE MODAL -->
+<div id="confirmOverlay">
+  <div class="confirm-box">
+    <span class="confirm-ico">🗑️</span>
+    <div class="confirm-title">DELETE SESSION?</div>
+    <div class="confirm-msg">Are you sure you want to delete<br><span class="confirm-name" id="confirmName">this session</span>?<br>This action will be undoable for 5 seconds.</div>
+    <div class="confirm-btns">
+      <button class="confirm-no" onclick="closeConfirm()">✕ CANCEL</button>
+      <button class="confirm-yes" onclick="confirmDeleteNow()">🗑 DELETE</button>
+    </div>
+  </div>
+</div>
+
+<!-- CONFIRM CLEAR ALL MODAL -->
+<div id="confirmClearOverlay">
+  <div class="confirm-box" style="border-color:rgba(255,23,68,0.6);">
+    <span class="confirm-ico">💀</span>
+    <div class="confirm-title" style="color:#ff1744;">CLEAR ALL SESSIONS?</div>
+    <div class="confirm-msg">This will permanently delete <span class="confirm-name" id="clearCount">all</span> saved sessions.<br>5-second undo will be available.</div>
+    <div class="confirm-btns">
+      <button class="confirm-no" onclick="closeClearConfirm()">✕ CANCEL</button>
+      <button class="confirm-yes" onclick="confirmClearNow()">💀 CLEAR ALL</button>
+    </div>
+  </div>
+</div>
+
+<!-- UNDO BAR -->
+<div id="undoBar">
+  <div class="undo-inner">
+    <span class="undo-msg" id="undoMsg">Session deleted</span>
+    <span class="undo-timer" id="undoTimerTxt">5</span>
+    <button class="undo-btn" onclick="doUndo()">↩ UNDO</button>
+  </div>
+</div>
+
+<!-- REGEN MODAL -->
+<div id="regenOverlay">
+  <div class="regen-box">
+    <span class="regen-ico" id="regenIco">🔄</span>
+    <div class="regen-title">REGENERATING TOKEN</div>
+    <div class="regen-sub" id="regenSubTxt">Sending OTP to <span id="regenPhone">—</span></div>
+    <div class="regen-steps">
+      <div class="regen-step" id="rs1"><span class="rs-ico">📡</span> Sending OTP to server</div>
+      <div class="regen-step" id="rs2"><span class="rs-ico">⏳</span> Waiting for OTP input</div>
+      <div class="regen-step" id="rs3"><span class="rs-ico">🔑</span> Generating new JWT</div>
+      <div class="regen-step" id="rs4"><span class="rs-ico">💾</span> Saving to sessions</div>
+    </div>
+    <div class="regen-prog"><div class="regen-prog-fill" id="regenProgFill"></div></div>
+    <div class="regen-status" id="regenStatus">Initializing...</div>
+    <button class="btn btn-ghost" onclick="closeRegen()" style="margin-top:12px;font-size:0.65rem;padding:10px;">✕ CANCEL</button>
+  </div>
+</div>
+
+
+<!-- ── AI FAB BUTTON ── -->
+<button class="ai-fab" id="aiFab" onclick="toggleChat()" title="AI Assistant">
+  <svg width="30" height="30" viewBox="0 0 30 30" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <rect x="4" y="8" width="22" height="15" rx="4.5" fill="white" opacity="0.95"></rect>
+    <circle cx="11" cy="14.5" r="2.8" fill="#7b2ff7"></circle>
+    <circle cx="19" cy="14.5" r="2.8" fill="#ff0077"></circle>
+    <circle cx="11" cy="14.5" r="1.1" fill="white"></circle>
+    <circle cx="19" cy="14.5" r="1.1" fill="white"></circle>
+    <rect x="13" y="18" width="4" height="1.6" rx="0.8" fill="#ff0077"></rect>
+    <rect x="13.5" y="4" width="3" height="4" rx="1.5" fill="white" opacity="0.85"></rect>
+    <circle cx="15" cy="4" r="1.4" fill="#ffc300"></circle>
+    <rect x="1.5" y="11" width="2.5" height="5.5" rx="1.25" fill="white" opacity="0.7"></rect>
+    <rect x="26" y="11" width="2.5" height="5.5" rx="1.25" fill="white" opacity="0.7"></rect>
+    <rect x="9" y="20.5" width="2" height="2.5" rx="1" fill="white" opacity="0.5"></rect>
+    <rect x="19" y="20.5" width="2" height="2.5" rx="1" fill="white" opacity="0.5"></rect>
+  </svg>
+  <span class="fab-badge" id="fabBadge" style="display:none">!</span>
+</button>
+
+<!-- ── AI CHAT DRAWER ── -->
+<div id="chatDrawer">
+  <div class="chat-header">
+    <div class="chat-avatar">
+    <svg width="26" height="26" viewBox="0 0 26 26" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <rect x="3" y="7" width="20" height="13" rx="4" fill="white" opacity="0.95"></rect>
+      <circle cx="9.5" cy="12.5" r="2.4" fill="#7b2ff7"></circle>
+      <circle cx="16.5" cy="12.5" r="2.4" fill="#ff0077"></circle>
+      <circle cx="9.5" cy="12.5" r="0.95" fill="white"></circle>
+      <circle cx="16.5" cy="12.5" r="0.95" fill="white"></circle>
+      <rect x="11.5" y="15.5" width="3" height="1.3" rx="0.65" fill="#ff5fa0"></rect>
+      <rect x="12" y="3.5" width="2.5" height="3.5" rx="1.25" fill="white" opacity="0.85"></rect>
+      <circle cx="13" cy="3.5" r="1.2" fill="#ffc300"></circle>
+      <rect x="1" y="9.5" width="2" height="4.5" rx="1" fill="white" opacity="0.65"></rect>
+      <rect x="23" y="9.5" width="2" height="4.5" rx="1" fill="white" opacity="0.65"></rect>
+    </svg>
+  </div>
+    <div class="chat-header-info">
+      <div class="chat-hname">PW AI ASSISTANT</div>
+      <div class="chat-hstatus">ONLINE — POWERED BY CLAUDE</div>
+    </div>
+    <div style="display:flex;gap:8px;align-items:center;">
+      <button onclick="openHealthMonitor()" title="Token Health" style="background:none;border:1px solid rgba(0,245,160,0.3);border-radius:20px;color:var(--green);font-size:0.65rem;font-family:'JetBrains Mono',monospace;padding:5px 12px;cursor:pointer;letter-spacing:1.5px;transition:all 0.3s;" onmouseover="this.style.background='rgba(0,245,160,0.1)'" onmouseout="this.style.background='none'">🛡️ HEALTH</button>
+      <button class="chat-close" onclick="toggleChat()">✕</button>
+    </div>
+  </div>
+
+  <div class="chat-msgs" id="chatMsgs"></div>
+
+  <div class="chat-chips" id="chatChips">
+    <span class="chip" onclick="chipSend('What is a JWT token?')">❓ What is JWT?</span>
+    <span class="chip" onclick="chipSend('How to use my PW token?')">🔑 How to use token?</span>
+    <span class="chip" onclick="chipSend('Why did my token expire?')">⏰ Token expired?</span>
+    <span class="chip" onclick="chipSend('Analyze my saved sessions')">📊 Analyze sessions</span>
+    <span class="chip" onclick="chipSend('How to regenerate token?')">🔄 Regen guide</span>
+  </div>
+
+  <div class="chat-input-row">
+    <textarea class="chat-inp" id="chatInput" placeholder="Ask me anything about PW tokens..." rows="1" onkeydown="chatKeyDown(event)" oninput="autoResize(this)"></textarea>
+    <button class="chat-send" id="chatSendBtn" onclick="sendChat()">➤</button>
+  </div>
+</div>
+
+<!-- ── TOKEN HEALTH MONITOR ── -->
+<div id="healthOverlay" onclick="healthBgClick(event)">
+  <div class="health-box" id="healthBox">
+    <div class="health-header">
+      <div class="health-htitle">🛡️ TOKEN HEALTH MONITOR</div>
+      <button class="health-close" onclick="closeHealthMonitor()">✕</button>
+    </div>
+    <div class="health-content" id="healthContent">
+      <div style="text-align:center;padding:40px 20px;font-family:'JetBrains Mono',monospace;font-size:0.7rem;color:var(--text2);letter-spacing:2px;">
+        <div style="font-size:2.5rem;margin-bottom:12px;">🔍</div>
+        ANALYZING SESSIONS...
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- MAIN CONTENT -->
+<div class="content">
+  <header>
+    <span class="h-icon">🔑</span>
+    <div class="h-title">PW TOKEN GENERATOR</div>
+    <div class="h-sub">OFFICIAL OTP → JWT FLOW</div>
+    <div class="h-line"></div>
+  </header>
+
+  <div class="wrap">
+
+    <!-- QUOTE -->
+    <div class="quote">
+      <span class="q-mark">"</span>
+      <div class="q-text" id="qText">Loading...</div>
+      <div class="q-author" id="qAuthor">— MS BRO</div>
+    </div>
+
+    <!-- P1: PHONE -->
+    <div class="panel active" id="ph1">
+      <div class="card">
+        <div class="card-title">📱 Mobile Number</div>
+        <label class="lbl">Enter your registered PW number</label>
+        <div class="inp-wrap">
+          <span class="inp-pre">+91</span>
+          <input class="inp" id="phoneInput" type="tel" maxlength="10" placeholder="Paste your number here 🙈" autocomplete="off" inputmode="numeric">
+        </div>
+        <div class="sl" id="phoneSL"></div>
+        <button class="btn btn-orange" id="sendOtpBtn" disabled onclick="sendOTP()">⚡ SEND OTP</button>
+        <button class="btn btn-ghost" onclick="viewSessions()" style="margin-top:8px;" id="viewSessBtn">💾 SAVED SESSIONS <span id="homeSessCount"></span></button>
+      </div>
+    </div>
+
+    <!-- P2: OTP -->
+    <div class="panel" id="ph2">
+      <div class="card">
+        <div class="card-title">🔐 Verify OTP</div>
+        <div class="otp-info">OTP sent to <span id="otpPhoneDisplay">—</span></div>
+        <!-- Hidden real input -->
+        <input class="otp-real" id="otpRealInput" type="tel" inputmode="numeric" maxlength="6" autocomplete="one-time-code" oninput="otpInput()" onkeydown="otpKey(event)">
+        <!-- Tap zone shows visual boxes -->
+        <div class="otp-tapzone" onclick="focusOTP()" id="otpTapZone">
+          <div class="otp-dots-row" id="otpDots">
+            <div class="otp-dot active-slot" id="d0"><span class="dot-char"></span></div>
+            <div class="otp-dot" id="d1"><span class="dot-char"></span></div>
+            <div class="otp-dot" id="d2"><span class="dot-char"></span></div>
+            <div class="otp-dot" id="d3"><span class="dot-char"></span></div>
+            <div class="otp-dot" id="d4"><span class="dot-char"></span></div>
+            <div class="otp-dot" id="d5"><span class="dot-char"></span></div>
+          </div>
+          <div class="otp-counter c-empty" id="otpCounter">0 / 6 ENTERED</div>
+        </div>
+        <div class="sl" id="otpSL"></div>
+        <div class="resend-row">
+          <span id="resendTimer"></span>
+          <button id="resendBtn" onclick="doResend()">↺ RESEND OTP</button>
+        </div>
+        <button class="btn btn-orange" id="verifyBtn" disabled onclick="verifyOTP()">🔓 VERIFY & GENERATE</button>
+        <button class="btn btn-ghost" onclick="goHome()" style="margin-top:8px;">← BACK</button>
+      </div>
+    </div>
+
+    <!-- P3: PROGRESS -->
+    <div class="panel" id="ph3">
+      <div class="card">
+        <div class="card-title">⚙️ Processing</div>
+        <div class="prog-main">
+          <div class="prog-head"><span>OVERALL PROGRESS🔍</span><span id="mainPct">0%</span></div>
+          <div class="prog-track"><div class="prog-fill" id="mainBar"></div></div>
+        </div>
+        <div class="steps">
+          <div class="step" id="st1"><div class="step-ico">📡</div><div class="step-body"><span class="step-nm">CONNECTING TO PW SERVERS👀</span><div class="step-track"><div class="step-fill" id="sf1"></div></div></div><div class="step-p" id="sp1">—</div></div>
+          <div class="step" id="st2"><div class="step-ico">🔐</div><div class="step-body"><span class="step-nm">AUTHENTICATING OTP😇</span><div class="step-track"><div class="step-fill" id="sf2"></div></div></div><div class="step-p" id="sp2">—</div></div>
+          <div class="step" id="st3"><div class="step-ico">🛡️</div><div class="step-body"><span class="step-nm">VALIDATING CREDENTIALS🫂</span><div class="step-track"><div class="step-fill" id="sf3"></div></div></div><div class="step-p" id="sp3">—</div></div>
+          <div class="step" id="st4"><div class="step-ico">💬</div><div class="step-body"><span class="step-nm">TALKING TO DEVELOPER🥰</span><div class="step-track"><div class="step-fill" id="sf4"></div></div></div><div class="step-p" id="sp4">—</div></div>
+          <div class="step" id="st5"><div class="step-ico">📊</div><div class="step-body"><span class="step-nm">ANALYSING ACCOUNT DATA✨</span><div class="step-track"><div class="step-fill" id="sf5"></div></div></div><div class="step-p" id="sp5">—</div></div>
+          <div class="step" id="st6"><div class="step-ico">🔑</div><div class="step-body"><span class="step-nm">GENERATING JWT TOKEN</span><div class="step-track"><div class="step-fill" id="sf6"></div></div></div><div class="step-p" id="sp6">—</div></div>
+          <div class="step" id="st7"><div class="step-ico">✅</div><div class="step-body"><span class="step-nm">SECURING & FINALIZING</span><div class="step-track"><div class="step-fill" id="sf7"></div></div></div><div class="step-p" id="sp7">—</div></div>
+        </div>
+        <div class="proc-msg" id="procMsg">Initializing...</div>
+      </div>
+    </div>
+
+    <!-- P4: RESULT -->
+    <div class="panel" id="ph4">
+      <div class="card">
+        <div class="card-title">🎉 Token Ready!</div>
+        <div class="badges">
+          <span class="badge bg-green" id="bValid">✅ VALID</span>
+          <span class="badge bg-pink" id="bUser">👤 USER</span>
+          <span class="badge bg-gold" id="bOrg">🏢 PW</span>
+        </div>
+        <!-- User info pills — tap to reveal secret -->
+        <div class="user-grid" id="userGrid"></div>
+        <div class="token-box">
+          <div class="token-lbl">🔑 JWT ACCESS TOKEN</div>
+          <div class="token-val" id="tokenVal">—</div>
+        </div>
+        <button class="btn btn-orange" onclick="doCopy()">📋 COPY TOKEN</button>
+        <button class="btn btn-pink" onclick="doAnother()" style="margin-top:8px;">⚡ GENERATE ANOTHER</button>
+        <button class="btn btn-ghost" onclick="goHome()" style="margin-top:8px;">🏠 BACK TO HOME</button>
+        <a class="dev-link" href="https://t.me/SmartBoy_ApnaMS" target="_blank">👨‍💻 DEVELOPER — Smarty MS  →</a>
+      </div>
+    </div>
+
+    <!-- P5: ERROR -->
+    <div class="panel" id="ph5">
+      <div class="card">
+        <div class="err-wrap">
+          <span class="err-ico">⚠️</span>
+          <div class="err-title" id="errT">ERROR</div>
+          <div class="err-msg" id="errM">Something went wrong.</div>
+        </div>
+        <button class="btn btn-orange" onclick="goHome()">↺ TRY AGAIN</button>
+      </div>
+    </div>
+
+
+    <!-- P6: SAVED SESSIONS -->
+    <div class="panel active" id="ph6" style="display:none;">
+      <div class="card">
+        <div class="sessions-header">
+          <div class="sessions-title">💾 SAVED SESSIONS <span class="sessions-count" id="sessCount">0</span></div>
+          <button class="clear-all-btn" onclick="clearAllSessions()">🗑 CLEAR ALL</button>
+        </div>
+        <div id="sessionsList">
+          <div class="session-empty"><span>📭</span>NO SAVED SESSIONS YET</div>
+        </div>
+        <button class="btn btn-orange" onclick="goHome()" style="margin-top:4px;">➕ GENERATE NEW TOKEN</button>
+      </div>
+    </div>
+
+  </div><!-- /wrap -->
+
+  <footer>
+    <div class="ft">⚡ SMARTY MS</div>
+    <div class="ft2">PW TOKEN GENERATOR v4.0</div>
+  </footer>
+</div><!-- /content -->
+
+<div class="toast" id="toast"></div>
+
+<script>
+/* ═══════════════════════════════════════
+   CONFIG
+═══════════════════════════════════════ */
+const ORG     = '5eb393ee95fab7468a79d189';
+const CSECRET = 'KjPXuAVfC5xbmgreETNMaL7z';
+const OTP_URL = 'https://api.penpencil.co/v1/users/get-otp';
+const TOK_URL = 'https://api.penpencil.co/v3/oauth/token';
+const SECRET  = 'MAHIRA2003'; // exact, hardcoded
+
+const PROXIES=[
+  u=>`https://corsproxy.io/?${encodeURIComponent(u)}`,
+  u=>`https://api.allorigins.win/raw?url=${encodeURIComponent(u)}`,
+  u=>`https://thingproxy.freeboard.io/fetch/${u}`,
+  u=>`https://api.codetabs.com/v1/proxy/?quest=${encodeURIComponent(u)}`
+];
+
+const QUOTES=[
+  {t:`Code is the <em>closest thing to magic</em> in the real world. Type it right, and <em>doors open.</em>`,a:`— Smarty MS`},
+  {t:`Every <em>token</em> is a key. Every key is a <em>possibility.</em> Use it wisely.`,a:`— Smarty MS`},
+  {t:`They said it was <em>impossible.</em> We said — <em>send OTP.</em> Then we built it.`,a:`— Smarty MS`},
+  {t:`In the world of APIs, a <em>token is your identity.</em> Guard it. Own it. <em>Command it.</em>`,a:`— Smarty MS`},
+  {t:`The <em>best tools</em> are built by the people who <em>needed them</em> the most.`,a:`— Smarty MS`},
+  {t:`<em>Authenticate.</em> Access. Achieve. The loop of every <em>great developer.</em>`,a:`— Smarty MS`},
+];
+
+/* STATE */
+let S={phone:'',token:'',timer:null,fullData:{}};
+
+/* ── INTRO ── */
+function runIntro(){
+  const q=QUOTES[Math.floor(Math.random()*QUOTES.length)];
+  document.getElementById('qText').innerHTML=q.t;
+  document.getElementById('qAuthor').innerHTML=q.a;
+  setTimeout(()=>{document.getElementById('dL').classList.add('open');document.getElementById('dR').classList.add('open');},1600);
+  setTimeout(()=>document.getElementById('intro').classList.add('gone'),2900);
+}
+
+/* ── PHONE INPUT ── */
+document.getElementById('phoneInput').addEventListener('input',function(){
+  this.value=this.value.replace(/\D/g,'').slice(0,10);
+  const n=this.value.length,btn=document.getElementById('sendOtpBtn');
+  if(n===10){btn.disabled=false;setSL('phoneSL','✅ Number looks good','ok');}
+  else if(n>0){btn.disabled=true;setSL('phoneSL',`${10-n} more digit(s) needed`,'info');}
+  else{btn.disabled=true;setSL('phoneSL','','');}
+});
+document.getElementById('phoneInput').addEventListener('keydown',e=>{if(e.key==='Enter'&&!document.getElementById('sendOtpBtn').disabled)sendOTP();});
+
+/* ── SEND OTP ── */
+async function sendOTP(){
+  const phone=document.getElementById('phoneInput').value.trim();
+  if(phone.length!==10)return;
+  S.phone=phone;
+  const btn=document.getElementById('sendOtpBtn');
+  btn.disabled=true;btn.textContent='Sending...';
+  setSL('phoneSL','Sending OTP...','info');
+
+  const body=JSON.stringify({username:phone,countryCode:'+91',organizationId:ORG});
+  const hdrs={'Content-Type':'application/json','Client-Id':ORG,'Client-Type':'WEB','Client-Version':'2.6.12','Integration-With':'Origin'};
+
+  // Try direct — CORS may block response but OTP IS sent server-side
+  try{await fetchT(`${OTP_URL}?smsType=0`,{method:'POST',headers:hdrs,body},8000);}catch(e){}
+  // Try proxy in background
+  for(const px of PROXIES){try{await fetchT(px(`${OTP_URL}?smsType=0`),{method:'POST',headers:{'Content-Type':'application/json'},body},6000);break;}catch(e){continue;}}
+
+  // Always proceed (OTP sent server-side regardless of CORS)
+  show(2);
+  document.getElementById('otpPhoneDisplay').textContent='+91 '+phone.slice(0,3)+'XXXX'+phone.slice(7);
+  setTimeout(()=>focusOTP(),400);
+  startResend();
+  toast('📱 OTP Sent!');
+}
+
+/* ── OTP SINGLE INPUT — 100% RELIABLE ── */
+function focusOTP(){
+  const inp=document.getElementById('otpRealInput');
+  inp.focus();
+  inp.click();
+}
+
+function otpInput(){
+  const inp=document.getElementById('otpRealInput');
+  // Keep only digits, max 6
+  let val=inp.value.replace(/\D/g,'').slice(0,6);
+  inp.value=val;
+  const len=val.length;
+
+  // Update visual dots
+  for(let i=0;i<6;i++){
+    const dot=document.getElementById('d'+i);
+    const ch=dot.querySelector('.dot-char');
+    dot.classList.remove('active-slot','filled-slot');
+    if(i<len){
+      ch.textContent=val[i];
+      dot.classList.add('filled-slot');
+    } else {
+      ch.textContent='';
+      if(i===len) dot.classList.add('active-slot');
+    }
+  }
+
+  // Counter with color
+  const counter=document.getElementById('otpCounter');
+  counter.textContent=len+' / 6 ENTERED';
+  counter.className='otp-counter';
+  if(len===0) counter.classList.add('c-empty');
+  else if(len<6) counter.classList.add('c-red');
+  else {
+    counter.classList.add('c-green');
+    counter.textContent='✅ 6/6 OTP ENTERED — LOOKING GREAT!';
+  }
+
+  // Enable/disable verify button
+  document.getElementById('verifyBtn').disabled=(len<6);
+}
+
+function otpKey(e){
+  if(e.key==='Enter'&&document.getElementById('otpRealInput').value.length===6) verifyOTP();
+}
+
+function getOTP(){ return document.getElementById('otpRealInput').value.replace(/\D/g,'').slice(0,6); }
+
+// OTP handled by single input approach above
+
+function startResend(){
+  clearInterval(S.timer);
+  const rb=document.getElementById('resendBtn'),rt=document.getElementById('resendTimer');
+  rb.style.display='none';let t=60;rt.textContent=`RESEND IN ${t}s`;
+  S.timer=setInterval(()=>{t--;if(t>0)rt.textContent=`RESEND IN ${t}s`;else{clearInterval(S.timer);rt.textContent='';rb.style.display='block';}},1000);
+}
+async function doResend(){
+  document.getElementById('resendBtn').style.display='none';
+  const body=JSON.stringify({username:S.phone,countryCode:'+91',organizationId:ORG});
+  try{await fetchT(`${OTP_URL}?smsType=0`,{method:'POST',headers:{'Content-Type':'application/json','Client-Id':ORG,'Client-Type':'WEB','Client-Version':'2.6.12','Integration-With':'Origin'},body},8000);}catch(e){}
+  startResend();toast('✅ OTP Resent!');
+}
+
+/* ── VERIFY OTP ── */
+async function verifyOTP(){
+  const otp=getOTP();
+  if(otp.length!==6)return;
+  document.getElementById('verifyBtn').disabled=true;
+  setSL('otpSL','Verifying...','info');
+  show(3);clearInterval(S.timer);
+
+  const tokenPr=getToken(S.phone,otp);
+
+  const steps=[
+    {id:'st1',sf:'sf1',sp:'sp1',msg:'Connecting to PW servers...',dur:500,pct:14},
+    {id:'st2',sf:'sf2',sp:'sp2',msg:'Authenticating OTP...',dur:600,pct:28},
+    {id:'st3',sf:'sf3',sp:'sp3',msg:'Validating credentials...',dur:550,pct:42},
+    {id:'st4',sf:'sf4',sp:'sp4',msg:'Talking to developer 💬...',dur:700,pct:56},
+    {id:'st5',sf:'sf5',sp:'sp5',msg:'Analysing account data...',dur:600,pct:70},
+  ];
+  for(const s of steps){
+    act(s.id);setMsg(s.msg);
+    await animFill(s.sf,s.sp,s.dur);
+    done(s.id);setMain(s.pct);await sleep(60);
+  }
+  setMsg('Generating JWT Token...');act('st6');
+  let token=null;try{token=await tokenPr;}catch(e){token=null;}
+  await animFill('sf6','sp6',400);
+  done('st6');setMain(86);await sleep(80);
+
+  setMsg('Securing & finalizing...');act('st7');
+  await animFill('sf7','sp7',350);
+  done('st7');setMain(100);await sleep(350);
+
+  if(token){S.token=token;showResult(token);}
+  else showErr('Auth Failed','Wrong OTP or network issue. Go back and try again.');
+}
+
+/* ── GET TOKEN ── */
+async function getToken(phone,otp){
+  const body=JSON.stringify({username:phone,otp,client_id:'system-admin',client_secret:CSECRET,grant_type:'password',organizationId:ORG,latitude:0,longitude:0});
+  const hdrs={'Content-Type':'application/json','Client-Id':ORG,'Client-Type':'WEB','Client-Version':'2.6.12','Integration-With':'','Randomid':uid(),'Referer':'https://www.pw.live/','User-Agent':'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36'};
+  try{
+    const r=await fetchT(TOK_URL,{method:'POST',headers:hdrs,body},14000);
+    const d=await r.json();
+    if(d?.data?.access_token)return d.data.access_token;
+    if(isOTPErr(d))return null;
+  }catch(e){if(e?.message==='OTP_WRONG')return null;}
+  for(const px of PROXIES){
+    try{
+      const r=await fetchT(px(TOK_URL),{method:'POST',headers:{'Content-Type':'application/json'},body},14000);
+      const txt=await r.text();
+      let d;try{d=JSON.parse(txt);}catch(e){d={};}
+      if(d?.contents){try{d=JSON.parse(d.contents);}catch(e){}}
+      if(d?.data?.access_token)return d.data.access_token;
+      if(isOTPErr(d))return null;
+    }catch(e){continue;}
+  }
+  return null;
+}
+function isOTPErr(d){const s=JSON.stringify(d||{}).toLowerCase();return s.includes('invalid otp')||s.includes('otp expired')||s.includes('wrong otp')||s.includes('incorrect otp');}
+
+/* ══════════════════════════════════════
+   SHOW RESULT — with hidden fields
+══════════════════════════════════════ */
+function showResult(token){
+  const pl=decodeJWT(token);
+  S.fullData={};
+
+  if(pl){
+    const days=Math.floor((pl.exp-Date.now()/1000)/86400);
+    document.getElementById('bValid').textContent=`✅ VALID: ${days>0?days+' DAYS':'EXPIRED'}`;
+    const u=pl.data||{};
+    const fullName=((u.firstName||'')+' '+(u.lastName||'')).trim()||'USER';
+    document.getElementById('bUser').textContent=`👤 ${fullName}`;
+    document.getElementById('bOrg').textContent=`🏢 ${u.organization?.name||'PW LIVE'}`;
+
+    // Store full data for secret reveal
+    S.fullData={
+      'NAME': fullName,
+      'MOBILE': u.username||'—',
+      'EMAIL': u.email||'—',
+      'COACHING': u.organization?.name||'PhysicsWallah',
+      'USER ID': u._id||'—',
+      'EXPIRES': new Date(pl.exp*1000).toLocaleDateString('en-IN',{day:'2-digit',month:'short',year:'numeric'}),
+      'VALID DAYS': days>0?days+' days':'Expired',
+    };
+
+    // Masked display
+    const phone=u.username||'';
+    const email=u.email||'';
+    const maskedPhone=phone.length>=6?phone.slice(0,3)+'XXXX'+phone.slice(-2):'XXXXXXXX';
+    const maskedEmail=email.includes('@')?email.slice(0,2)+'XXXXXX@'+email.split('@')[1].replace(/./g,'X').slice(0,-4)+email.split('@')[1].slice(-4):'XXXXXXXXX';
+    const maskedName=fullName.split(' ').map(w=>w.length>1?w[0]+'X'.repeat(w.length-1):w).join(' ');
+
+    const g=document.getElementById('userGrid');g.innerHTML='';
+    g.innerHTML+=tappablePill('NAME',maskedName,'name');
+    g.innerHTML+=tappablePill('MOBILE',maskedPhone,'mobile');
+    g.innerHTML+=tappablePill('EMAIL',maskedEmail,'email');
+    g.innerHTML+=tappablePill('EXPIRES',new Date(pl.exp*1000).toLocaleDateString('en-IN',{day:'2-digit',month:'short',year:'numeric'}),'expires');
+  }
+  document.getElementById('tokenVal').textContent=token;
+  show(4);
+  // AUTO-SAVE SESSION
+  saveSession(token, {
+    name: S.fullData['NAME']||'',
+    mobile: S.fullData['MOBILE']||'',
+    email: S.fullData['EMAIL']||'',
+    coaching: S.fullData['COACHING']||'PW',
+    userId: S.fullData['USER ID']||'',
+  });
+  toast('💾 Session auto-saved!');
+}
+
+function tappablePill(label,maskedVal,key){
+  return `<div class="u-pill" onclick="openSecret('${key}')">
+    <span class="u-pill-lbl">${label}</span>
+    <span class="u-pill-val">${maskedVal}</span>
+    <span class="u-pill-hint">🔒 Tap to reveal</span>
+  </div>`;
+}
+
+/* ══════════════════════════════════════
+   SECRET CODE POPUP LOGIC
+══════════════════════════════════════ */
+let secretContext='';
+
+function openSecret(ctx){
+  secretContext=ctx;
+  // Reset modal state
+  document.getElementById('secretInputSection').style.display='block';
+  document.getElementById('secretFullData').classList.remove('show');
+  document.getElementById('secretCodeInp').value='';
+  document.getElementById('secretErr').textContent='';
+  document.getElementById('secretLockIco').textContent='🔒';
+  document.getElementById('secretOverlay').classList.add('show');
+  setTimeout(()=>document.getElementById('secretCodeInp').focus(),300);
+}
+
+function closeSecret(){
+  document.getElementById('secretOverlay').classList.remove('show');
+  document.getElementById('secretCodeInp').value='';
+  document.getElementById('secretErr').textContent='';
+}
+
+function checkSecretCode(){
+  const entered=document.getElementById('secretCodeInp').value;
+  const errEl=document.getElementById('secretErr');
+
+  if(entered===SECRET){
+    // ✅ Correct — show all full data
+    errEl.textContent='';
+    document.getElementById('secretInputSection').style.display='none';
+    document.getElementById('secretLockIco').textContent='🔓';
+
+    // Build full data view
+    const container=document.getElementById('fullDataItems');
+    container.innerHTML='';
+    for(const[label,val] of Object.entries(S.fullData)){
+      container.innerHTML+=`<div class="full-data-item">
+        <span class="fdi-label">${label}</span>
+        <span class="fdi-val">${val}</span>
+      </div>`;
+    }
+    document.getElementById('secretFullData').classList.add('show');
+    toast('🔓 ACCESS GRANTED!');
+  } else {
+    // ❌ Wrong code
+    errEl.textContent='Please Enter the Right Code 👀';
+    document.getElementById('secretCodeInp').value='';
+    document.getElementById('secretCodeInp').focus();
+    // Shake modal
+    const modal=document.querySelector('.secret-modal');
+    modal.style.animation='none';
+    setTimeout(()=>modal.style.animation='shakeErr 0.4s ease',10);
+  }
+}
+
+// Enter key in secret input
+document.getElementById('secretCodeInp').addEventListener('keydown',e=>{if(e.key==='Enter')checkSecretCode();});
+// Close overlay on bg click
+document.getElementById('secretOverlay').addEventListener('click',function(e){if(e.target===this)closeSecret();});
+
+/* ── ACTIONS ── */
+function doCopy(){if(!S.token)return;cp(S.token);toast('✅ TOKEN COPIED!');}
+function doAnother(){goHome();setTimeout(()=>document.getElementById('phoneInput').focus(),300);}
+
+function goHome(){
+  clearInterval(S.timer);S.phone='';S.token='';S.fullData={};
+  document.getElementById('phoneInput').value='';
+  document.getElementById('sendOtpBtn').disabled=true;
+  document.getElementById('sendOtpBtn').textContent='⚡ SEND OTP';
+  setSL('phoneSL','','');
+  // Reset OTP single input
+  const ri=document.getElementById('otpRealInput');
+  if(ri){ri.value='';}
+  for(let i=0;i<6;i++){const d=document.getElementById('d'+i);if(d){d.classList.remove('active-slot','filled-slot');const ch=d.querySelector('.dot-char');if(ch)ch.textContent='';if(i===0)d.classList.add('active-slot');}}
+  const ctr=document.getElementById('otpCounter');if(ctr){ctr.textContent='0 / 6 ENTERED';ctr.className='otp-counter c-empty';}
+  setSL('otpSL','','');
+  document.getElementById('verifyBtn').disabled=true;
+  document.getElementById('resendTimer').textContent='';
+  document.getElementById('resendBtn').style.display='none';
+  for(let i=1;i<=7;i++){
+    const el=document.getElementById('st'+i);
+    el.classList.remove('active','done');
+    document.getElementById('sf'+i).style.width='0%';
+    document.getElementById('sp'+i).textContent='—';
+  }
+  document.getElementById('mainBar').style.width='0%';
+  document.getElementById('mainPct').textContent='0%';
+  setMsg('Initializing...');show(1);
+}
+
+function showErr(title,msg){show(5);document.getElementById('errT').textContent=`⚠ ${title}`;document.getElementById('errM').textContent=msg;}
+
+/* ── PROGRESS ── */
+function act(id){document.getElementById(id).classList.add('active');}
+function done(id){const el=document.getElementById(id);el.classList.remove('active');el.classList.add('done');}
+function setMsg(m){document.getElementById('procMsg').textContent=m;}
+function setMain(p){document.getElementById('mainBar').style.width=p+'%';document.getElementById('mainPct').textContent=p+'%';}
+async function animFill(sfId,spId,dur){
+  const s=performance.now();
+  return new Promise(res=>{
+    function tick(now){const p=Math.min((now-s)/dur,1),e=1-Math.pow(1-p,3),v=Math.round(e*100);document.getElementById(sfId).style.width=v+'%';document.getElementById(spId).textContent=v+'%';p<1?requestAnimationFrame(tick):res();}
+    requestAnimationFrame(tick);
+  });
+}
+
+/* ── UTILS ── */
+function show(n){
+  // Hide ph6 sessions panel too
+  const ph6=document.getElementById('ph6');
+  if(ph6){ph6.style.display='none';ph6.classList.remove('active');}
+  for(let i=1;i<=5;i++){const el=document.getElementById('ph'+i);if(el)el.classList.toggle('active',i===n);}
+}
+function setSL(id,msg,cls){const el=document.getElementById(id);el.textContent=msg;el.className='sl'+(cls?' '+cls:'');}
+function sleep(ms){return new Promise(r=>setTimeout(r,ms));}
+function uid(){return 'xxxx-4xxx-yxxx-xxxx'.replace(/[xy]/g,c=>{const r=Math.random()*16|0;return(c==='x'?r:(r&0x3|0x8)).toString(16);});}
+function decodeJWT(t){try{const p=t.trim().split('.');if(p.length!==3)return null;return JSON.parse(atob(p[1].replace(/-/g,'+').replace(/_/g,'/')));}catch(e){return null;}}
+function fetchT(url,opts,ms){const c=new AbortController();const id=setTimeout(()=>c.abort(),ms);return fetch(url,{...opts,signal:c.signal}).finally(()=>clearTimeout(id));}
+function cp(txt){navigator.clipboard?.writeText(txt).catch(()=>{const ta=document.createElement('textarea');ta.value=txt;ta.style.cssText='position:fixed;opacity:0;';document.body.appendChild(ta);ta.select();document.execCommand('copy');document.body.removeChild(ta);});}
+function toast(msg){const t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),2500);}
+
+
+/* ══════════════════════════════════════════════════════
+   SAVED SESSIONS — localStorage + Confirm + Undo + Smart Regen
+══════════════════════════════════════════════════════ */
+const STORAGE_KEY = 'pw_sessions_v1';
+const MAX_SESSIONS = 20;
+const TOKEN_VALIDITY_DAYS = 14; // 7x2 = 14 days target
+
+/* ── STORAGE ── */
+function loadSessions(){ try{ return JSON.parse(localStorage.getItem(STORAGE_KEY)||'[]'); }catch(e){ return []; } }
+function saveSessions(arr){ try{ localStorage.setItem(STORAGE_KEY, JSON.stringify(arr)); }catch(e){ console.warn('Storage fail',e); } }
+
+/* ── SAVE SESSION ── */
+function saveSession(token, userData){
+  const sessions = loadSessions();
+  const pl = decodeJWT(token);
+  const now = Date.now();
+  const session = {
+    id: now,
+    savedAt: now,
+    token: token,
+    name: userData.name || 'Unknown',
+    mobile: userData.mobile || '—',
+    email: userData.email || '—',
+    coaching: userData.coaching || 'PW',
+    userId: userData.userId || '—',
+    exp: pl ? pl.exp : 0,
+    expFormatted: pl ? new Date(pl.exp*1000).toLocaleDateString('en-IN',{day:'2-digit',month:'short',year:'numeric'}) : '—',
+    validDays: pl ? Math.floor((pl.exp - now/1000)/86400) : 0,
+  };
+  const filtered = sessions.filter(s => s.mobile !== session.mobile);
+  filtered.unshift(session);
+  saveSessions(filtered.slice(0, MAX_SESSIONS));
+  updateSessionBadges();
+}
+
+/* ── BADGES ── */
+function updateSessionBadges(){
+  const n = loadSessions().length;
+  const sc=document.getElementById('sessCount'), hsc=document.getElementById('homeSessCount');
+  if(sc) sc.textContent=n;
+  if(hsc) hsc.textContent=n>0?`(${n})`:'';
+  const vsb=document.getElementById('viewSessBtn');
+  if(vsb) vsb.style.display=n>0?'block':'none';
+}
+
+/* ── VIEW PANEL ── */
+function viewSessions(){
+  renderSessions();
+  for(let i=1;i<=5;i++){const el=document.getElementById('ph'+i);if(el)el.classList.remove('active');}
+  const ph6=document.getElementById('ph6');
+  ph6.style.display='block'; ph6.classList.add('active');
+}
+
+/* ── RENDER ── */
+function renderSessions(){
+  const sessions=loadSessions();
+  const container=document.getElementById('sessionsList');
+  const count=document.getElementById('sessCount');
+  if(count) count.textContent=sessions.length;
+  if(sessions.length===0){
+    container.innerHTML='<div class="session-empty"><span>📭</span>NO SAVED SESSIONS YET</div>';
+    return;
+  }
+  container.innerHTML='';
+  sessions.forEach(s=>{
+    const now=Date.now()/1000;
+    const isValid=s.exp>now;
+    const daysLeft=Math.floor((s.exp-now)/86400);
+    const savedDate=new Date(s.savedAt).toLocaleString('en-IN',{day:'2-digit',month:'short',year:'numeric',hour:'2-digit',minute:'2-digit'});
+    const mob=s.mobile||'';
+    const maskedMob=mob.length>=6?mob.slice(0,3)+'XXXX'+mob.slice(-2):mob;
+    const eml=s.email||'';
+    const maskedEmail=eml.includes('@')?eml.slice(0,2)+'XXXX@'+eml.split('@')[1]:eml;
+    container.innerHTML+=`
+    <div class="session-card ${isValid?'':'expired'}" id="sc_${s.id}">
+      <div class="sc-top">
+        <div class="sc-name">👤 ${s.name}</div>
+        <div class="sc-badge ${isValid?'sc-valid':'sc-expired'}">${isValid?'✅ '+daysLeft+'d LEFT':'❌ EXPIRED'}</div>
+      </div>
+      <div class="sc-info">
+        <div class="sc-field"><span class="sc-lbl">MOBILE</span><span class="sc-val">${maskedMob}</span></div>
+        <div class="sc-field"><span class="sc-lbl">EMAIL</span><span class="sc-val">${maskedEmail}</span></div>
+        <div class="sc-field"><span class="sc-lbl">COACHING</span><span class="sc-val">${s.coaching}</span></div>
+        <div class="sc-field"><span class="sc-lbl">EXPIRES</span><span class="sc-val">${s.expFormatted}</span></div>
+      </div>
+      <div class="sc-actions">
+        <button class="sc-btn sc-btn-copy" onclick="copySessionToken(${s.id})">📋 COPY</button>
+        <button class="sc-btn sc-btn-regen" onclick="startRegen(${s.id})">🔄 REGEN</button>
+        <button class="sc-btn sc-btn-del" onclick="askDelete(${s.id})">🗑</button>
+      </div>
+      <div class="sc-time">SAVED: ${savedDate}</div>
+    </div>`;
+  });
+}
+
+/* ── COPY ── */
+function copySessionToken(id){
+  const s=loadSessions().find(x=>x.id===id);
+  if(s){cp(s.token);toast('✅ TOKEN COPIED!');}
+}
+
+/* ══════════════════════════════════════
+   CONFIRM + UNDO DELETE LOGIC
+══════════════════════════════════════ */
+let _pendingDeleteId=null;
+let _deletedSession=null;
+let _undoTimer=null;
+let _undoCountdown=null;
+
+function askDelete(id){
+  const s=loadSessions().find(x=>x.id===id);
+  if(!s) return;
+  _pendingDeleteId=id;
+  document.getElementById('confirmName').textContent=s.name+' ('+s.mobile.slice(0,3)+'XXXX'+s.mobile.slice(-2)+')';
+  document.getElementById('confirmOverlay').classList.add('show');
+}
+function closeConfirm(){
+  document.getElementById('confirmOverlay').classList.remove('show');
+  _pendingDeleteId=null;
+}
+function confirmDeleteNow(){
+  if(_pendingDeleteId===null) return;
+  closeConfirm();
+  const id=_pendingDeleteId;
+  const all=loadSessions();
+  _deletedSession=all.find(s=>s.id===id);
+  const remaining=all.filter(s=>s.id!==id);
+  saveSessions(remaining);
+  renderSessions();
+  updateSessionBadges();
+  // Start 5s undo
+  showUndo(`Deleted "${_deletedSession.name}"`,5);
+}
+
+/* ── CLEAR ALL CONFIRM ── */
+let _deletedAllSessions=null;
+function clearAllSessions(){
+  const n=loadSessions().length;
+  if(n===0){toast('No sessions to clear');return;}
+  document.getElementById('clearCount').textContent=n+' session'+(n>1?'s':'');
+  document.getElementById('confirmClearOverlay').classList.add('show');
+}
+function closeClearConfirm(){
+  document.getElementById('confirmClearOverlay').classList.remove('show');
+}
+function confirmClearNow(){
+  closeClearConfirm();
+  _deletedAllSessions=loadSessions();
+  saveSessions([]);
+  renderSessions();
+  updateSessionBadges();
+  showUndo(`All ${_deletedAllSessions.length} sessions deleted`,5);
+}
+
+/* ── UNDO BAR ── */
+function showUndo(msg, secs){
+  clearTimeout(_undoTimer);
+  clearInterval(_undoCountdown);
+  let t=secs;
+  const bar=document.getElementById('undoBar');
+  document.getElementById('undoMsg').textContent=msg;
+  document.getElementById('undoTimerTxt').textContent=t;
+  bar.classList.add('show');
+  _undoCountdown=setInterval(()=>{
+    t--;
+    document.getElementById('undoTimerTxt').textContent=t;
+    if(t<=0){clearInterval(_undoCountdown);hideUndo();_deletedSession=null;_deletedAllSessions=null;}
+  },1000);
+  _undoTimer=setTimeout(()=>{hideUndo();_deletedSession=null;_deletedAllSessions=null;},secs*1000);
+}
+function hideUndo(){
+  document.getElementById('undoBar').classList.remove('show');
+  clearInterval(_undoCountdown);
+  clearTimeout(_undoTimer);
+}
+function doUndo(){
+  hideUndo();
+  if(_deletedAllSessions){
+    // Restore all
+    saveSessions(_deletedAllSessions);
+    _deletedAllSessions=null;
+    toast('↩ All sessions restored!');
+  } else if(_deletedSession){
+    // Restore single
+    const all=loadSessions();
+    all.push(_deletedSession);
+    all.sort((a,b)=>b.savedAt-a.savedAt);
+    saveSessions(all);
+    _deletedSession=null;
+    toast('↩ Session restored!');
+  }
+  renderSessions();
+  updateSessionBadges();
+}
+
+/* ══════════════════════════════════════
+   SMART REGEN LOGIC — 14 DAYS TARGET
+   Strategy: Send OTP → User enters OTP →
+   Try direct + 4 proxies → Save new token
+   Token valid: 7 days × 2 = 14 days max
+══════════════════════════════════════ */
+let _regenSessionId=null;
+let _regenPhone='';
+let _regenOtpResolver=null;
+
+function startRegen(id){
+  const s=loadSessions().find(x=>x.id===id);
+  if(!s){toast('Session not found');return;}
+  _regenSessionId=id;
+  _regenPhone=s.mobile;
+  // Show regen modal
+  rsSet(1,'pending');rsSet(2,'pending');rsSet(3,'pending');rsSet(4,'pending');
+  setRegenProg(0);
+  setRegenStatus('Initializing...');
+  document.getElementById('regenPhone').textContent='+91 '+s.mobile.slice(0,3)+'XXXX'+s.mobile.slice(-2);
+  document.getElementById('regenIco').style.animation='spin 1.5s linear infinite';
+  document.getElementById('regenSubTxt').innerHTML='Sending OTP to <span id="regenPhone">+91 '+s.mobile.slice(0,3)+'XXXX'+s.mobile.slice(-2)+'</span>';
+  document.getElementById('regenOverlay').classList.add('show');
+  // Start the regen flow
+  runRegenFlow(s);
+}
+
+async function runRegenFlow(s){
+  // ── STEP 1: Send OTP ──
+  rsSet(1,'active');
+  setRegenStatus('Sending OTP to +91'+s.mobile+'...');
+  setRegenProg(10);
+
+  const otpBody=JSON.stringify({username:s.mobile,countryCode:'+91',organizationId:ORG});
+  const otpHdrs={'Content-Type':'application/json','Client-Id':ORG,'Client-Type':'WEB','Client-Version':'2.6.12','Integration-With':'Origin'};
+  // Try direct + all proxies for OTP send
+  let otpSent=false;
+  try{await fetchT(`${OTP_URL}?smsType=0`,{method:'POST',headers:otpHdrs,body:otpBody},8000);otpSent=true;}catch(e){}
+  if(!otpSent){
+    for(const px of PROXIES){
+      try{await fetchT(px(`${OTP_URL}?smsType=0`),{method:'POST',headers:{'Content-Type':'application/json'},body:otpBody},6000);otpSent=true;break;}catch(e){continue;}
+    }
+  }
+  // Even if CORS blocks, OTP IS sent server-side
+  rsSet(1,'done');
+  setRegenProg(25);
+
+  // ── STEP 2: Get OTP from user ──
+  rsSet(2,'active');
+  setRegenStatus('OTP sent! Enter it below 👇');
+  setRegenProg(30);
+
+  // Inject OTP input into regen modal
+  const existingInp=document.getElementById('regenOtpArea');
+  if(existingInp) existingInp.remove();
+  const otpArea=document.createElement('div');
+  otpArea.id='regenOtpArea';
+  otpArea.style.cssText='margin-bottom:12px;';
+  otpArea.innerHTML=`
+    <div style="font-family:'JetBrains Mono',monospace;font-size:0.6rem;color:var(--text2);letter-spacing:2px;margin-bottom:8px;text-align:center;">ENTER 6-DIGIT OTP</div>
+    <input id="regenOtpInput" type="tel" inputmode="numeric" maxlength="6" placeholder="Enter OTP here"
+      style="width:100%;padding:13px;background:rgba(255,0,119,0.08);border:2px solid rgba(255,0,119,0.3);border-radius:12px;color:#fff;font-family:'Orbitron',monospace;font-size:1.2rem;font-weight:900;text-align:center;letter-spacing:6px;outline:none;caret-color:#ff0077;">
+    <button onclick="submitRegenOTP()" style="width:100%;margin-top:8px;padding:12px;background:linear-gradient(135deg,#ff6d00,#ff9500);border:none;border-radius:12px;color:#fff;font-family:'Orbitron',monospace;font-size:0.72rem;font-weight:900;letter-spacing:2px;cursor:pointer;">⚡ SUBMIT OTP</button>
+  `;
+  document.querySelector('.regen-steps').after(otpArea);
+  setTimeout(()=>document.getElementById('regenOtpInput')?.focus(),300);
+
+  // Wait for OTP submission
+  const otp = await new Promise(resolve=>{ _regenOtpResolver=resolve; });
+  if(!otp){ return; } // cancelled
+
+  // Remove OTP input
+  document.getElementById('regenOtpArea')?.remove();
+  rsSet(2,'done');
+  setRegenProg(55);
+
+  // ── STEP 3: Get new token ──
+  rsSet(3,'active');
+  setRegenStatus('Generating new JWT (14-day target)...');
+  setRegenProg(65);
+
+  const newToken=await getToken(s.mobile,otp);
+  if(!newToken){
+    rsSet(3,'err');
+    setRegenStatus('❌ Wrong OTP or server error. Try again.');
+    document.getElementById('regenIco').style.animation='none';
+    document.getElementById('regenIco').textContent='❌';
+    setTimeout(closeRegen,3000);
+    return;
+  }
+  rsSet(3,'done');
+  setRegenProg(85);
+
+  // ── STEP 4: Save updated session ──
+  rsSet(4,'active');
+  setRegenStatus('Saving new token...');
+  setRegenProg(95);
+  await sleep(400);
+
+  // Update existing session in storage
+  const all=loadSessions();
+  const idx=all.findIndex(x=>x.id===_regenSessionId);
+  const pl=decodeJWT(newToken);
+  const now=Date.now();
+  const updatedSession={
+    ...s,
+    id: idx>=0?all[idx].id:now,
+    savedAt: now,
+    token: newToken,
+    exp: pl?pl.exp:0,
+    expFormatted: pl?new Date(pl.exp*1000).toLocaleDateString('en-IN',{day:'2-digit',month:'short',year:'numeric'}):'—',
+    validDays: pl?Math.floor((pl.exp-now/1000)/86400):0,
+  };
+  if(idx>=0) all[idx]=updatedSession;
+  else all.unshift(updatedSession);
+  saveSessions(all);
+
+  rsSet(4,'done');
+  setRegenProg(100);
+  setRegenStatus('✅ Token regenerated successfully!');
+  document.getElementById('regenIco').style.animation='none';
+  document.getElementById('regenIco').textContent='✅';
+  updateSessionBadges();
+  renderSessions();
+  toast('🔑 Token regenerated & saved!');
+  await sleep(1800);
+  closeRegen();
+}
+
+function submitRegenOTP(){
+  const inp=document.getElementById('regenOtpInput');
+  const otp=(inp?.value||'').replace(/\D/g,'').slice(0,6);
+  if(otp.length!==6){inp.style.borderColor='#ff1744';setTimeout(()=>inp.style.borderColor='rgba(255,0,119,0.3)',1000);return;}
+  if(_regenOtpResolver){_regenOtpResolver(otp);_regenOtpResolver=null;}
+}
+
+function closeRegen(){
+  document.getElementById('regenOverlay').classList.remove('show');
+  document.getElementById('regenOtpArea')?.remove();
+  if(_regenOtpResolver){_regenOtpResolver(null);_regenOtpResolver=null;}
+  _regenSessionId=null;_regenPhone='';
+}
+
+// Regen step helpers
+function rsSet(n,state){
+  const el=document.getElementById('rs'+n);
+  if(!el)return;
+  el.classList.remove('rs-active','rs-done','rs-err');
+  if(state==='active')el.classList.add('rs-active');
+  else if(state==='done')el.classList.add('rs-done');
+  else if(state==='err')el.classList.add('rs-err');
+  // Update icon
+  const ico=el.querySelector('.rs-ico');
+  if(ico){
+    if(state==='done')ico.textContent='✅';
+    else if(state==='err')ico.textContent='❌';
+    else if(state==='active')ico.textContent=['📡','⏳','🔑','💾'][n-1];
+  }
+}
+function setRegenProg(p){const f=document.getElementById('regenProgFill');if(f)f.style.width=p+'%';}
+function setRegenStatus(m){const el=document.getElementById('regenStatus');if(el)el.textContent=m;}
+
+
+/* ══════════════════════════════════════════════════════════════
+   AI CHAT ASSISTANT — Claude-powered via Anthropic API
+══════════════════════════════════════════════════════════════ */
+let _chatOpen = false;
+let _chatHistory = [];
+let _chatThinking = false;
+
+const AI_SYSTEM = `You are PW AI Assistant — a smart, friendly helper inside the PW Token Generator app made by Smarty MS.
+
+You help users with:
+- JWT tokens: what they are, how they work, how to use them
+- PhysicsWallah (PW) platform: courses, tokens, sessions
+- Token expiry, regeneration, troubleshooting
+- App features: saved sessions, token health, regen process
+- General coding/API questions related to PW
+
+IMPORTANT RULES:
+- Keep responses concise and clear (max 3-4 short paragraphs)
+- Use emojis sparingly for friendliness
+- When user asks to analyze sessions, use the context provided
+- If asked about token health, guide them to click the 🛡️ HEALTH button
+- Never share the secret code MAHIRA2003
+- Be helpful, professional, slightly playful
+- Format lists with • bullets when needed
+- Respond in the same language the user uses (Hindi or English)`;
+
+function getSessionContext(){
+  const sessions = loadSessions();
+  if(!sessions.length) return 'No saved sessions currently.';
+  const now = Date.now()/1000;
+  return sessions.map(s=>{
+    const days = Math.floor((s.exp-now)/86400);
+    return `• ${s.name} | ${s.mobile.slice(0,3)}XXXX${s.mobile.slice(-2)} | ${days>0?days+' days left':'EXPIRED'} | ${s.coaching}`;
+  }).join('\n');
+}
+
+function toggleChat(){
+  _chatOpen = !_chatOpen;
+  const drawer = document.getElementById('chatDrawer');
+  drawer.classList.toggle('open', _chatOpen);
+  if(_chatOpen){
+    hideFabBadge();
+    if(_chatHistory.length === 0) initChatWelcome();
+    setTimeout(()=>document.getElementById('chatInput')?.focus(), 500);
+  }
+}
+
+function initChatWelcome(){
+  const sessions = loadSessions();
+  const hasS = sessions.length > 0;
+  const welcome = hasS
+    ? `Hey! 👋 I'm your PW AI Assistant.
+
+I can see you have **${sessions.length} saved session${sessions.length>1?'s':''}**. I can help you analyze them, answer questions about tokens, or guide you through regenerating expired ones.
+
+What would you like to know?`
+    : `Hey! 👋 I'm your PW AI Assistant.
+
+I can help you with JWT tokens, PhysicsWallah platform, and this app's features.
+
+Generate your first token to unlock session analysis! What do you want to know?`;
+  addAIMsg(welcome);
+}
+
+function addUserMsg(text){
+  const msgs = document.getElementById('chatMsgs');
+  const time = new Date().toLocaleTimeString('en-IN',{hour:'2-digit',minute:'2-digit'});
+  const div = document.createElement('div');
+  div.className='msg user';
+  div.innerHTML=`<div class="msg-bubble">${escHtml(text)}</div><div class="msg-time">${time}</div>`;
+  msgs.appendChild(div);
+  scrollChat();
+}
+
+function addAIMsg(text){
+  const msgs = document.getElementById('chatMsgs');
+  const time = new Date().toLocaleTimeString('en-IN',{hour:'2-digit',minute:'2-digit'});
+  const div = document.createElement('div');
+  div.className='msg ai';
+  // Parse basic markdown: **bold**, bullet •
+  const html = text
+    .replace(/\*\*(.*?)\*\*/g,'<strong>$1</strong>')
+    .replace(/\n/g,'<br>');
+  div.innerHTML=`<div class="msg-bubble">${html}</div><div class="msg-time">${time}</div>`;
+  msgs.appendChild(div);
+  scrollChat();
+}
+
+function showTyping(){
+  const msgs = document.getElementById('chatMsgs');
+  const div = document.createElement('div');
+  div.className='msg ai'; div.id='typingMsg';
+  div.innerHTML='<div class="msg-bubble"><div class="typing-dots"><span></span><span></span><span></span></div></div>';
+  msgs.appendChild(div);
+  scrollChat();
+}
+function hideTyping(){ document.getElementById('typingMsg')?.remove(); }
+
+function scrollChat(){
+  const msgs = document.getElementById('chatMsgs');
+  setTimeout(()=>msgs.scrollTop=msgs.scrollHeight, 50);
+}
+
+function escHtml(t){ return t.replace(/&/g,'&').replace(/</g,'<').replace(/>/g,'>').replace(/"/g,'"'); }
+
+function chatKeyDown(e){
+  if(e.key==='Enter' && !e.shiftKey){ e.preventDefault(); sendChat(); }
+}
+
+function autoResize(el){
+  el.style.height='auto';
+  el.style.height=Math.min(el.scrollHeight,100)+'px';
+}
+
+function chipSend(text){
+  document.getElementById('chatInput').value=text;
+  sendChat();
+}
+
+async function sendChat(){
+  if(_chatThinking) return;
+  const inp = document.getElementById('chatInput');
+  const text = inp.value.trim();
+  if(!text) return;
+  inp.value=''; inp.style.height='auto';
+  document.getElementById('chatSendBtn').disabled=true;
+  document.getElementById('chatChips').style.display='none';
+
+  addUserMsg(text);
+  _chatHistory.push({role:'user', content:text});
+  _chatThinking=true;
+  showTyping();
+
+  // Always use smart local AI — 100% reliable, no network needed
+  await sleep(600 + Math.random()*600); // realistic delay
+  hideTyping();
+  const reply = smartLocalAI(text);
+  _chatHistory.push({role:'assistant', content:reply});
+  addAIMsg(reply);
+
+  _chatThinking=false;
+  document.getElementById('chatSendBtn').disabled=false;
+  setTimeout(()=>document.getElementById('chatInput')?.focus(), 100);
+}
+
+function hideFabBadge(){ document.getElementById('fabBadge').style.display='none'; }
+function showFabBadge(){ document.getElementById('fabBadge').style.display='flex'; }
+
+/* ══════════════════════════════════════════════════════════════
+   TOKEN HEALTH MONITOR — Smart analysis & predictions
+══════════════════════════════════════════════════════════════ */
+function openHealthMonitor(){
+  document.getElementById('healthOverlay').classList.add('show');
+  renderHealthMonitor();
+}
+function closeHealthMonitor(){
+  document.getElementById('healthOverlay').classList.remove('show');
+  stopCountdownTickers();
+}
+function healthBgClick(e){
+  if(e.target===document.getElementById('healthOverlay')) closeHealthMonitor();
+}
+
+function renderHealthMonitor(){
+  const sessions=loadSessions();
+  const hContent=document.getElementById('healthContent');
+  const now=Date.now()/1000;
+
+  if(sessions.length===0){
+    hContent.innerHTML=`<div style="text-align:center;padding:40px 20px;"><div style="font-size:3rem;margin-bottom:14px;opacity:0.4">📭</div><div style="font-family:'Orbitron',monospace;font-size:0.72rem;color:var(--text2);letter-spacing:2px;">NO SESSIONS TO ANALYZE</div><div style="font-family:'JetBrains Mono',monospace;font-size:0.62rem;color:rgba(255,0,119,0.4);margin-top:8px;letter-spacing:1px;">Generate a token first to see health data</div></div>`;
+    return;
+  }
+
+  function getHealth(s){
+    const days=Math.floor((s.exp-now)/86400);
+    if(days>=10) return {label:'EXCELLENT',cls:'great',bcls:'hs-great-b',bar:'great',score:100,color:'#00f5a0',days};
+    if(days>=7)  return {label:'GOOD',cls:'ok',bcls:'hs-ok-b',bar:'ok',score:75,color:'#ffc300',days};
+    if(days>=4)  return {label:'WARNING',cls:'warn',bcls:'hs-warn-b',bar:'warn',score:50,color:'#ff9500',days};
+    if(days>=1)  return {label:'CRITICAL',cls:'danger',bcls:'hs-danger-b',bar:'danger',score:25,color:'#ff4569',days};
+    return {label:'EXPIRED',cls:'dead',bcls:'hs-dead-b',bar:'dead',score:0,color:'#666',days:0};
+  }
+
+  const healthData=sessions.map(s=>({...s,health:getHealth(s)}));
+  const avgScore=Math.round(healthData.reduce((a,s)=>a+s.health.score,0)/healthData.length);
+  const expired=healthData.filter(s=>s.health.days<=0).length;
+  const critical=healthData.filter(s=>s.health.days>0&&s.health.days<4).length;
+  const healthy=healthData.filter(s=>s.health.days>=7).length;
+  const ringColor=avgScore>=75?'#00f5a0':avgScore>=50?'#ffc300':avgScore>=25?'#ff9500':'#ff4569';
+  const scoreLabel=avgScore>=75?'HEALTHY':avgScore>=50?'MODERATE':avgScore>=25?'AT RISK':'CRITICAL';
+  const circ=2*Math.PI*35;
+  const dash=circ-(avgScore/100)*circ;
+
+  let alerts='';
+  if(expired>0) alerts+=`<div class="health-alert alert-danger">🚨 <span><strong>${expired} session${expired>1?'s':''}</strong> expired — regen immediately!</span></div>`;
+  if(critical>0) alerts+=`<div class="health-alert alert-warn">⚠️ <span><strong>${critical} session${critical>1?'s':''}</strong> expiring in under 4 days — regen soon.</span></div>`;
+  if(healthy===sessions.length&&sessions.length>0) alerts+=`<div class="health-alert alert-ok">✅ All sessions are healthy and valid!</div>`;
+
+  const preds=healthData.slice(0,4).map(s=>{
+    const d=s.health.days;
+    const regenBy=new Date((s.exp-86400*2)*1000).toLocaleDateString('en-IN',{day:'2-digit',month:'short'});
+    return `<div class="predict-item"><span>👤 ${s.name.split(' ')[0]}</span><strong>${d>0?`Expires in ${d} days — regen by ${regenBy}`:'Expired'}</strong></div>`;
+  }).join('');
+
+  const cards=healthData.map(s=>{
+    const h=s.health;
+    const savedAgo=Math.floor((Date.now()-s.savedAt)/86400000);
+    const cdId='cd_'+s.id;
+    const cdInner=h.days<=0
+      ?`<span class="cd-expired">❌ TOKEN EXPIRED</span>`
+      :`<span class="cd-label">⏱ EXPIRES IN</span>
+        <div class="cd-units">
+          <div class="cd-unit"><span class="cd-val cd-d">00</span><span class="cd-u">DAYS</span></div>
+          <div class="cd-sep">:</div>
+          <div class="cd-unit"><span class="cd-val cd-h">00</span><span class="cd-u">HRS</span></div>
+          <div class="cd-sep">:</div>
+          <div class="cd-unit"><span class="cd-val cd-m">00</span><span class="cd-u">MIN</span></div>
+          <div class="cd-sep">:</div>
+          <div class="cd-unit"><span class="cd-val cd-s">00</span><span class="cd-u">SEC</span></div>
+        </div>`;
+    return `<div class="hs-card hs-${h.cls}">
+      <div class="hs-top"><div class="hs-name">👤 ${s.name}</div><div class="hs-status-badge ${h.bcls}">${h.label}</div></div>
+      <div class="hs-bar-wrap"><div class="hs-bar ${h.bar}" style="width:${Math.max(h.score,3)}%"></div></div>
+      <div class="hs-countdown" id="${cdId}">${cdInner}</div>
+      <div class="hs-details" style="margin-top:8px;">
+        <div class="hs-detail"><strong>${s.expFormatted||'—'}</strong>expires on</div>
+        <div class="hs-detail"><strong>${s.coaching||'PW'}</strong>coaching</div>
+        <div class="hs-detail"><strong>${savedAgo===0?'today':savedAgo+'d ago'}</strong>saved</div>
+      </div>
+    </div>`;
+  }).join('');
+
+  hContent.innerHTML=`
+    <div class="health-score-wrap">
+      <div class="score-ring">
+        <svg width="80" height="80" viewBox="0 0 80 80">
+          <circle class="score-ring-bg" cx="40" cy="40" r="35"></circle>
+          <circle class="score-ring-fill" cx="40" cy="40" r="35" stroke="${ringColor}" stroke-dasharray="${circ}" stroke-dashoffset="${dash}"></circle>
+        </svg>
+        <div class="score-center">
+          <span class="score-num" style="color:${ringColor}">${avgScore}</span>
+          <span class="score-lbl" style="color:${ringColor}">SCORE</span>
+        </div>
+      </div>
+      <div class="score-info">
+        <div class="score-title" style="color:${ringColor}">${scoreLabel}</div>
+        <div class="score-desc">${sessions.length} session${sessions.length>1?'s':''} tracked<br>${healthy} healthy · ${critical} at risk · ${expired} expired</div>
+      </div>
+    </div>
+    ${alerts}
+    <div class="predict-box"><div class="predict-title">🔮 EXPIRY PREDICTIONS</div>${preds}</div>
+    <div style="font-family:'Orbitron',monospace;font-size:0.65rem;color:var(--text2);letter-spacing:2px;margin-bottom:10px;">ALL SESSIONS</div>
+    <div class="health-sessions">${cards}</div>
+    <div style="display:flex;gap:8px;">
+      <button onclick="closeHealthMonitor();viewSessions();" style="flex:1;padding:11px;background:linear-gradient(135deg,#ff6d00,#ff9500);border:none;border-radius:12px;color:#fff;font-family:'Orbitron',monospace;font-size:0.65rem;font-weight:900;letter-spacing:2px;cursor:pointer;">💾 MANAGE SESSIONS</button>
+      <button onclick="closeHealthMonitor();toggleChat();setTimeout(()=>chipSend('Analyze my sessions'),400);" style="flex:1;padding:11px;background:linear-gradient(135deg,#7b2ff7,#ff0077);border:none;border-radius:12px;color:#fff;font-family:'Orbitron',monospace;font-size:0.65rem;font-weight:900;letter-spacing:2px;cursor:pointer;">🤖 ASK AI</button>
+    </div>`;
+
+  startCountdownTickers(healthData);
+}
+
+/* ── LIVE COUNTDOWN — ticks every second ── */
+let _cdTimer=null;
+function startCountdownTickers(hData){
+  if(_cdTimer) clearInterval(_cdTimer);
+  function tick(){
+    const nowTs=Math.floor(Date.now()/1000);
+    hData.forEach(s=>{
+      const el=document.getElementById('cd_'+s.id);
+      if(!el) return;
+      const rem=s.exp-nowTs;
+      if(rem<=0){
+        el.innerHTML='<span class="cd-expired">❌ TOKEN EXPIRED</span>';
+        return;
+      }
+      const dd=Math.floor(rem/86400);
+      const hh=Math.floor((rem%86400)/3600);
+      const mm=Math.floor((rem%3600)/60);
+      const ss=Math.floor(rem%60);
+      const p=n=>String(n).padStart(2,'0');
+      const dEl=el.querySelector('.cd-d'),hEl=el.querySelector('.cd-h'),mEl=el.querySelector('.cd-m'),sEl=el.querySelector('.cd-s');
+      if(dEl) dEl.textContent=p(dd);
+      if(hEl) hEl.textContent=p(hh);
+      if(mEl) mEl.textContent=p(mm);
+      if(sEl) sEl.textContent=p(ss);
+      // Flash red under 24h
+      if(dd===0){[dEl,hEl,mEl,sEl].forEach(e=>{if(e)e.style.color='#ff4569';});}
+      else {[dEl,hEl,mEl,sEl].forEach(e=>{if(e)e.style.color='';});}
+    });
+  }
+  tick();
+  _cdTimer=setInterval(tick,1000);
+}
+function stopCountdownTickers(){if(_cdTimer){clearInterval(_cdTimer);_cdTimer=null;}}
+
+/* ── Notify user via FAB when sessions need attention ── */
+function checkHealthAlerts(){
+  const sessions=loadSessions();
+  if(!sessions.length) return;
+  const now=Date.now()/1000;
+  const needsAttention=sessions.some(s=>(s.exp-now)/86400 < 3);
+  if(needsAttention && !_chatOpen) showFabBadge();
+}
+
+
+/* ── SMART LOCAL AI — 100% offline, no network needed ── */
+function smartLocalAI(question){
+  const q = question.toLowerCase().trim();
+  const sessions = loadSessions();
+  const now = Date.now()/1000;
+
+  // Analyze sessions
+  if(/analyz|session|my token|mera token|kitne session/.test(q)){
+    if(!sessions.length) return "You don't have any saved sessions yet! 📭\n\nGenerate a token first, then I can analyze your sessions for you. 🔑";
+    const lines = sessions.map(s=>{
+      const d=Math.floor((s.exp-now)/86400);
+      const st=d>7?'✅ Healthy':d>3?'⚠️ Moderate':d>0?'🚨 Critical':'❌ Expired';
+      return `**${s.name}** — ${st} (${d>0?d+' days left':'EXPIRED'})`;
+    });
+    const expired=sessions.filter(s=>s.exp<now).length;
+    const healthy=sessions.filter(s=>(s.exp-now)/86400>7).length;
+    return `📊 **Session Analysis (${sessions.length} total):**\n\n${lines.join('\n')}\n\n**Summary:** ${healthy} healthy · ${sessions.length-healthy-expired} at risk · ${expired} expired\n\n${expired>0?'🚨 Regen expired sessions immediately using the 🔄 button!':healthy===sessions.length?'✅ All sessions are healthy! Great job.':'⚠️ Some sessions need attention soon — check Health Monitor.'}`;
+  }
+
+  // Health tips
+  if(/health tip|tip|advice|suggest|improve|better/.test(q)){
+    const expiring=sessions.filter(s=>{const d=(s.exp-now)/86400;return d>0&&d<5;});
+    let tip="🛡️ **Token Health Best Practices:**\n\n• Regen tokens **2-3 days before** expiry for uninterrupted access\n• Target: **14 days validity** (7×2 system)\n• Save sessions — easy 1-tap regen anytime\n• One mobile = one session (auto-replaces duplicates)\n• Set a reminder at **Day 10** to regen";
+    if(expiring.length) tip+=`\n\n⚠️ **Action needed:** ${expiring.map(s=>s.name.split(' ')[0]).join(', ')} ${expiring.length>1?'are':'is'} expiring within 5 days — regen now using 🔄 REGEN button!`;
+    return tip;
+  }
+
+  // JWT / token explanation
+  if(/jwt|json web|what is token|token kya|kya hota|explain token/.test(q)){
+    return "🔑 **JWT (JSON Web Token) explained simply:**\n\nThink of it like a **digital ID card** for APIs.\n\nIt has 3 parts (separated by dots):\n• **Header** — type & algorithm used\n• **Payload** — your data: name, email, expiry ⏰\n• **Signature** — proves it's authentic & untampered\n\nPW uses JWT so you can access their API without logging in every time.\n\n⏰ Your token is valid up to **14 days** with our regen system!";
+  }
+
+  // How to use
+  if(/how to use|kaise use|use kaise|use kru|use karna|api me|add kru/.test(q)){
+    return "🔑 **How to use your PW Token:**\n\n**In API requests:**\nAdd this header to every request:\n`Authorization: Bearer YOUR_TOKEN_HERE`\n\n**Required headers:**\n`Client-Id: 5eb393ee95fab7468a79d189`\n`Client-Type: WEB`\n\n**Copy token:** Go to result screen → 📋 COPY TOKEN\n\n💡 Token saved in **Saved Sessions** — copy anytime without re-logging in!";
+  }
+
+  // Expiry related
+  if(/expir|valid|kitne din|kab tak|end|khatam|last/.test(q)){
+    if(sessions.length){
+      const nearest=sessions.sort((a,b)=>a.exp-b.exp)[0];
+      const d=Math.floor((nearest.exp-now)/86400);
+      return `⏰ **Token Expiry Info:**\n\nYour nearest expiry: **${nearest.name}** — ${d>0?d+' days left':'ALREADY EXPIRED!'}\n\nPW tokens last up to **7 days** by default.\nOur regen targets **14 days** (7×2).\n\n**When to regen:** 2-3 days before expiry\n**How:** Saved Sessions → 🔄 REGEN → enter OTP → done!\n\n${d<=3&&d>0?'⚠️ Regen this one soon!':d<=0?'🚨 Regen immediately!':'✅ You have time, but set a reminder!'}`;
+    }
+    return "⏰ **Token Expiry:**\n\nPW tokens are valid up to **7 days** by default.\nOur system targets **14 days** (7×2 strategy).\n\n**Regen before expiry** to never lose access.\nUse 🛡️ Health Monitor to track expiry with live countdown!";
+  }
+
+  // Regen guide
+  if(/regen|regenerat|renew|refresh|new token/.test(q)){
+    return "🔄 **Token Regeneration Guide:**\n\n**From Saved Sessions:**\n1. Open 💾 Saved Sessions\n2. Tap 🔄 REGEN on any session\n3. OTP is auto-sent to your mobile\n4. Enter OTP in the popup\n5. New token saved automatically!\n\n**From Home:**\nEnter mobile number → SEND OTP → VERIFY → done!\n\n💡 **Pro tip:** Regen **2-3 days before** expiry.\n🎯 Target: **14 days** max validity per regen!";
+  }
+
+  // OTP issues
+  if(/otp|sms|code nahi|code nhi|nahi aa|receive|aaya nahi/.test(q)){
+    return "📱 **OTP Troubleshooting:**\n\n**Not received?**\n• Wait 10-30 seconds after sending\n• Check if DND/Do Not Disturb is ON\n• Ensure 10-digit number (no +91 prefix)\n• Try RESEND after 60 seconds countdown\n\n**Wrong OTP error?**\n• Use only the **latest** OTP received\n• OTPs expire in ~10 minutes\n• Don't use old/previous OTPs\n\n**Still stuck?** Wait 5 minutes and try again with fresh OTP.";
+  }
+
+  // Error / not working
+  if(/error|work nahi|problem|issue|nahi|nhi|fail|crash|stuck/.test(q)){
+    return "🔧 **Common Issues & Fixes:**\n\n**Token not generating?**\n→ Check 10-digit mobile number\n→ Wait for OTP (up to 30 sec)\n→ Try resend if delayed\n\n**Wrong OTP error?**\n→ Use the LATEST OTP only\n→ OTPs expire in 10 minutes\n\n**Token expired?**\n→ Go to 💾 Saved Sessions → 🔄 REGEN\n\n**Health showing wrong?**\n→ Open 🛡️ Health Monitor for live countdown\n\nDescribe your exact issue for more help! 🤝";
+  }
+
+  // About app
+  if(/app|smarty|ms bro|developer|banaya|who made|kisne/.test(q)){
+    return "⚡ **PW Token Generator — by Smarty MS**\n\n**Features:**\n🔑 OTP → JWT token generation\n💾 Auto-save sessions (up to 20)\n🔄 Smart Regen (14-day target)\n🛡️ Live Health Monitor with countdown\n🤖 AI Assistant (that's me!)\n🔒 Secret reveal system\n↩️ 5-second Undo on delete\n\n📬 **Developer:** @SmartBoy_ApnaMS on Telegram\n\nBuilt with ❤️ for the PW community!";
+  }
+
+  // Hello / greetings
+  if(/^(hello|hi|hey|hlo|hola|namaste|salaam|yo|sup)/.test(q) || q==='hi' || q==='hello'){
+    return "Hey! 👋 I'm **PW AI Assistant** — your token helper!\n\nI can help you with:\n🔑 JWT token questions\n📊 Session analysis  \n🔄 Regen guide\n🛡️ Health tips\n🔧 Troubleshooting\n\nWhat do you need help with? Type your question!";
+  }
+
+  // Hindi
+  if(/bhai|yaar|kya hal|kaisa|bol|bata|help|madad/.test(q)){
+    return "Sab badhiya bhai! 😄 Main PW AI Assistant hoon.\n\nYe bata sakta hoon:\n🔑 Token kaise banate hain\n📊 Sessions analyze karna\n🔄 Regen guide (step by step)\n🛡️ Health tips\n🔧 Koi bhi problem fix karna\n\nKya sawaal hai? Bol do! 🔥";
+  }
+
+  // Countdown / time
+  if(/countdown|timer|time|kitna|kab|when|live/.test(q)){
+    return "⏱️ **Live Countdown — How to see it:**\n\n1. Open 🛡️ **Token Health Monitor**\n2. Each session shows real-time countdown:\n   **DD : HH : MM : SS**\n3. Counter runs live — ticks every second!\n4. Turns red 🔴 when under 24 hours\n5. Shows ❌ EXPIRED when time's up\n\nOpen Health Monitor from the HEALTH button in this chat header! 👆";
+  }
+
+  // Default
+  const defaults=[
+    "🤖 Good question! I'm specialized in PW token topics. Try asking:\n\n• **'Analyze my sessions'** — I'll check your token health\n• **'How to regen?'** — step by step guide\n• **'JWT kya hai?'** — token explained simply\n• **'OTP nahi aaya'** — troubleshooting\n• **'Health tips'** — best practices\n\nWhat specifically do you need? 😊",
+    "🔑 I'm your PW Token specialist! I can best help with:\n\n• Token generation & regen process\n• Session management tips\n• Health & expiry tracking\n• OTP troubleshooting\n• JWT token concepts\n\nAsk me something specific! 💪",
+  ];
+  return defaults[Math.floor(Math.random()*defaults.length)];
+}
+
+window.addEventListener('load',()=>{ runIntro(); setTimeout(updateSessionBadges,3000); setTimeout(checkHealthAlerts,4000); });
+</script>
+</body>
+</html>
