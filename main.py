@@ -61,7 +61,7 @@ async def safe_edit(message, text: str, **kwargs):
 # Bot credentials from environment variables (Render compatible)
 API_ID = int(os.environ.get("API_ID", 38498066))
 API_HASH = os.environ.get("API_HASH", "c9696114751feacdeb1b4487f5839a1a")
-BOT_TOKEN = os.environ.get("BOT_TOKEN", "8277629583:AAHFrekPPUxgY65KjbbNS5wVULsVeXrgPkg")
+BOT_TOKEN = os.environ.get("BOT_TOKEN", "8277629583:AAHtb7rCNXKk1nhJe_GpR3bLp8nb9jh0r_w")
 
 # Initialize Bot Globally (IMPORTANT FIX)
 bot = Client("bot", api_id=API_ID, api_hash=API_HASH, bot_token=BOT_TOKEN)
@@ -94,7 +94,7 @@ async def start(bot, message):
 
   keyboard = [
     [
-      InlineKeyboardButton("🔥🚀 Physics Wallah without Purchase 🚀", callback_data="pwwp")
+      InlineKeyboardButton("🚀 Physics Wallah without Purchase 🚀", callback_data="pwwp")
     ],
     [
       InlineKeyboardButton("📘 Classplus without Purchase 📘", callback_data="cpwp")
