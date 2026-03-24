@@ -79,11 +79,13 @@ def run_flask():
     
 
 image_list = [
-"https://graph.org/file/8b1f4146a8d6b43e5b2bc-be490579da043504d5.jpg",
-"https://graph.org/file/b75dab2b3f7eaff612391-282aa53538fd3198d4.jpg",
-"https://graph.org/file/38de0b45dd9144e524a33-0205892dd05593774b.jpg",
-"https://graph.org/file/be39f0eebb9b66d7d6bc9-59af2f46a4a8c510b7.jpg",
-"https://graph.org/file/8b7e3d10e362a2850ba0a-f7c7c46e9f4f50b10b.jpg",
+"https://graph.org/file/a7defa3fc5af14e1ef64d-6aaf13e93fca95cfb2.jpg",
+"https://graph.org/file/0477971c295c3ece935ef-2af948bd4f14c6d1da.jpg",
+"https://graph.org/file/9664850ce3c6ebaa5007e-e812fa25118aa1a1d7.jpg",
+"https://graph.org/file/b7466fa9700260aab4f77-a48f2b54d2f8328112.jpg",
+"https://graph.org/file/2eb3c7ed975b9f9dffaa5-9b991b04b9478b1026.jpg",
+"https://graph.org/file/e5cbc501850bf1c4351f6-2e913a534c92f5f5f8.jpg",
+"https://graph.org/file/b48abf3696926fd6f36b3-9e1be53031a43a444d.jpg",
 ]
 print(4321)
 
@@ -94,13 +96,13 @@ async def start(bot, message):
 
   keyboard = [
     [
-      InlineKeyboardButton("🚀 Physics Wallah without Purchase 🚀", callback_data="pwwp")
+      InlineKeyboardButton("🫡Physics Wallah without Purchase🫡", callback_data="pwwp")
     ],
     [
-      InlineKeyboardButton("📘 Classplus without Purchase 📘", callback_data="cpwp")
+      InlineKeyboardButton("🥹Classplus without Purchase🥹", callback_data="cpwp")
     ],
     [
-      InlineKeyboardButton("📒 Appx Without Purchase 📒", callback_data="appxwp")
+      InlineKeyboardButton("🫣Appx Without Purchase🫣", callback_data="appxwp")
     ]
   ]
 
