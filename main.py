@@ -89,7 +89,6 @@ from pyrogram.types.messages_and_media import message
 from pyrogram.types import InlineKeyboardButton, InlineKeyboardMarkup
 from pyrogram.errors import FloodWait
 from pyromod import listen
-from pyromod.exceptions.listener_timeout import ListenerTimeout
 from pyrogram.types import Message
 import pyrogram
 from pyrogram import Client, filters
