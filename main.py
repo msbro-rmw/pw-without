@@ -153,7 +153,7 @@ async def start(bot, message):
 
     keyboard = [
         [
-            InlineKeyboardButton("🧧 STRANGER BOYS 🧧", url="https://t.me/+aBB53vou0Z5hZWI1")
+            InlineKeyboardButton("🧧 STRANGER BOYS ✅🧧", url="https://t.me/+aBB53vou0Z5hZWI1")
         ],
         [
             InlineKeyboardButton("🌸 🎉Physics Wallah🎉 BOYS 🌸", callback_data="pwwp")
