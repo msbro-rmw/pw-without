@@ -199,21 +199,51 @@ async def fetch_pwwp_data(
     params: Dict = None,
     data: Dict = None,
     method: str = "GET",
+    quiet_statuses: tuple = (404,),
 ) -> Any:
+    """
+    Robust JSON fetch.
+
+    - 4xx (except 429) is terminal: no retry, return None.
+    - 404s are common when a chapter/contentType has no data; log quietly.
+    - 401/403 always surfaced once.
+    - 5xx and transient network errors are retried with exponential backoff.
+    """
     max_retries = 3
     for attempt in range(max_retries):
         try:
             async with session.request(
                 method, url, headers=headers, params=params, json=data
             ) as response:
-                # 401/403 shouldn't be retried silently — surface once
-                if response.status in (401, 403):
+                status = response.status
+
+                if status in (401, 403):
                     text = await response.text()
                     logging.error(
-                        f"Auth error {response.status} for {url}: {text[:200]}"
+                        f"Auth error {status} for {url}: {text[:200]}"
                     )
                     return None
-                response.raise_for_status()
+
+                if 400 <= status < 500 and status != 429:
+                    # Terminal client error — don't retry
+                    if status in quiet_statuses:
+                        logging.debug(f"{status} (expected) for {url}")
+                    else:
+                        text = await response.text()
+                        logging.warning(
+                            f"{status} for {url}: {text[:200]}"
+                        )
+                    return None
+
+                if status >= 500 or status == 429:
+                    logging.warning(
+                        f"Attempt {attempt + 1}: {status} for {url}, will retry"
+                    )
+                    if attempt < max_retries - 1:
+                        await asyncio.sleep(2 ** attempt)
+                        continue
+                    return None
+
                 try:
                     return await response.json()
                 except Exception:
@@ -225,13 +255,14 @@ async def fetch_pwwp_data(
                             f"Non-JSON response from {url}: {text[:200]}"
                         )
                         return None
+
         except aiohttp.ClientError as e:
-            logging.error(
-                f"Attempt {attempt + 1} failed: aiohttp error fetching {url}: {e}"
+            logging.warning(
+                f"Attempt {attempt + 1} network error fetching {url}: {e}"
             )
         except Exception as e:
             logging.exception(
-                f"Attempt {attempt + 1} failed: Unexpected error fetching {url}: {e}"
+                f"Attempt {attempt + 1} unexpected error fetching {url}: {e}"
             )
 
         if attempt < max_retries - 1:
@@ -397,38 +428,37 @@ async def fetch_pwwp_all_schedule(
     content_type,
     headers: Dict,
 ) -> List[Dict]:
-    """Try v2 first, fall back to v3 if v2 returns nothing (newer batches)."""
-    all_schedule: List[Dict] = []
-    for api_version in ("v2", "v3"):
-        page = 1
-        fetched_any = False
-        while True:
-            params = {
-                "tag": chapter_id,
-                "contentType": content_type,
-                "page": page,
-            }
-            url = (
-                f"{PW_API_BASE}/{api_version}/batches/"
-                f"{selected_batch_id}/subject/{subject_id}/contents"
-            )
-            data = await fetch_pwwp_data(
-                session, url, headers=headers, params=params
-            )
+    """
+    Page through the v2 contents endpoint.
 
-            if data and data.get("success") and data.get("data"):
-                items = data["data"]
-                if not items:
-                    break
-                for item in items:
-                    item["content_type"] = content_type
-                    all_schedule.append(item)
-                fetched_any = True
-                page += 1
-            else:
-                break
-        if fetched_any:
+    An empty `data` array is a legitimate "no content of this type" response,
+    not an error — don't fall back to v3 (the v3 URL 404s on pw.live today).
+    """
+    all_schedule: List[Dict] = []
+    page = 1
+    while True:
+        params = {
+            "tag": chapter_id,
+            "contentType": content_type,
+            "page": page,
+        }
+        url = (
+            f"{PW_API_BASE}/v2/batches/"
+            f"{selected_batch_id}/subject/{subject_id}/contents"
+        )
+        data = await fetch_pwwp_data(
+            session, url, headers=headers, params=params
+        )
+
+        if not (data and data.get("success")):
             break
+        items = data.get("data") or []
+        if not items:
+            break
+        for item in items:
+            item["content_type"] = content_type
+            all_schedule.append(item)
+        page += 1
     return all_schedule
 
 
@@ -492,27 +522,22 @@ async def get_pwwp_all_chapters(
     subject_id,
     headers: Dict,
 ):
+    """Page through the v2 topics endpoint for a given subject."""
     all_chapters: List[Dict] = []
-    for api_version in ("v2", "v3"):
-        page = 1
-        fetched_any = False
-        while True:
-            url = (
-                f"{PW_API_BASE}/{api_version}/batches/"
-                f"{selected_batch_id}/subject/{subject_id}/topics?page={page}"
-            )
-            data = await fetch_pwwp_data(session, url, headers=headers)
-            if data and data.get("data"):
-                chapters = data["data"]
-                if not chapters:
-                    break
-                all_chapters.extend(chapters)
-                fetched_any = True
-                page += 1
-            else:
-                break
-        if fetched_any:
+    page = 1
+    while True:
+        url = (
+            f"{PW_API_BASE}/v2/batches/"
+            f"{selected_batch_id}/subject/{subject_id}/topics?page={page}"
+        )
+        data = await fetch_pwwp_data(session, url, headers=headers)
+        if not (data and data.get("data")):
             break
+        chapters = data["data"]
+        if not chapters:
+            break
+        all_chapters.extend(chapters)
+        page += 1
     return all_chapters
 
 
