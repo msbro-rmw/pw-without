@@ -164,7 +164,7 @@ async def start(bot, message):
         ],
         [
             InlineKeyboardButton(
-                "🌸 🎉Physics Wallah🎉 BOYS 🌸",
+                "🌸 🎉Physics Wallahhh🎉 BOYS 🌸",
                 callback_data="pwwp",
             )
         ],
